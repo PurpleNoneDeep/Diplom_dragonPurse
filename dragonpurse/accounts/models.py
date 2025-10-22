@@ -19,9 +19,10 @@ class Transaction(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)  # Заменяем поле на связь с категорией
     description = models.TextField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # Новое поле суммы
 
     def __str__(self):
-        return f"{self.date} - {self.category.name} - {self.description}"
+        return f"{self.date} - {self.category.name} - {self.description} - {self.amount}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

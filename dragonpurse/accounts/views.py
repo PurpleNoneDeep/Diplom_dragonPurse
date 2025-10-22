@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 class CategoryListView(View):
     def get(self, request):
@@ -32,8 +32,19 @@ class CategoryCreateView(View):
 
 class TransactionListView(View):
     def get(self, request):
-        transactions = Transaction.objects.filter(user=request.user).order_by('-date')  # Получаем транзакции текущего пользователя
-        return render(request, 'accounts/transaction_list.html', {'transactions': transactions})
+        today = timezone.now()
+        date_filter = request.GET.get('date', today.date())
+
+        transactions = Transaction.objects.filter(
+            user=request.user,
+            date__date=date_filter
+        ).order_by('-date')
+
+        return render(request, 'accounts/transaction_list.html', {
+            'transactions': transactions,
+            'selected_date': date_filter,
+            'today': today.date(),
+        })
 
 class TransactionCreateView(View):
     def get(self, request):
