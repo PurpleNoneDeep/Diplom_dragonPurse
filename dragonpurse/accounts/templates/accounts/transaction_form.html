@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание транзакции</title>
+</head>
+<body>
+    <h1>Создание транзакции</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="category">Категория:</label>
+        <select name="category" id="category">
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <label for="description">Описание:</label>
+        {{ form.description }}  <!-- Используем поле описания из формы -->
+        <button type="submit">Добавить транзакцию</button>
+    </form>
+    <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
+</body>
+</html>

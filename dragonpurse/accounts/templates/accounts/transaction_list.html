@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список транзакций</title>
+</head>
+<body>
+    <h1>Список транзакций</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Описание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td>{{ transaction.category.name }}</td>
+                    <td>{{ transaction.description }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">Нет транзакций.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'transaction_create' %}">Добавить новую транзакцию</a>
+</body>
+</html>
