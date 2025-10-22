@@ -1,23 +1,57 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Создание транзакции</title>
-</head>
 <body>
     <h1>Создание транзакции</h1>
     <form method="post">
         {% csrf_token %}
+
+        <label for="amount">Сумма:</label>
+        <input type="number" name="amount" id="amount" required step="0.01" />
+
+        <label for="category_type">Тип транзакции:</label>
+        <select name="category_type" id="category_type" onchange="updateCategories()">
+            <option value="">Выберите тип</option>
+            <option value="income">Доход</option>
+            <option value="expense">Расход</option>
+        </select>
+
         <label for="category">Категория:</label>
         <select name="category" id="category">
-            {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-            {% endfor %}
+            <option value="">Сначала выберите тип</option>
         </select>
+
         <label for="description">Описание:</label>
-        {{ form.description }}  <!-- Используем поле описания из формы -->
+        {{ form.description }}
+
+        <label for="date">Дата:</label>
+        <input type="date" name="date" id="date" value="{{ current_date }}" />
+
         <button type="submit">Добавить транзакцию</button>
     </form>
     <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
+
+    <script>
+        const categoriesIncome = {{ categories_income|safe }};
+        const categoriesExpense = {{ categories_expense|safe }};
+
+        function updateCategories() {
+            const typeSelect = document.getElementById('category_type');
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = ''; // Очищаем категории
+
+            const selectedType = typeSelect.value;
+            let categories = [];
+
+            if (selectedType === 'income') {
+                categories = categoriesIncome;
+            } else if (selectedType === 'expense') {
+                categories = categoriesExpense;
+            }
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+        }
+    </script>
 </body>
-</html>

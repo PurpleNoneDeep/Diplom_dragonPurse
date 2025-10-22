@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import LoginView, LogoutView, DashboardView, RegisterView, ProfileView, SettingsView, SharedAccountView, \
-    NotificationListView, TransactionCreateView, TransactionListView, CategoryCreateView, CategoryListView
+    NotificationListView, TransactionCreateView, TransactionListView, CategoryCreateView, CategoryListView, \
+    TransactionDeleteView, AnalyticsView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
@@ -13,6 +14,8 @@ urlpatterns = [
     path('notifications/', NotificationListView.as_view(), name='notifications'),
     path('transactions/', TransactionListView.as_view(), name='transaction_list'),
     path('transactions/new/', TransactionCreateView.as_view(), name='transaction_create'),
-    path('categories/new/', CategoryCreateView.as_view(), name='category_create'),  # Новый маршрут для добавления категории
+    path('transactions/delete/<int:pk>/', TransactionDeleteView.as_view(), name='transaction_delete'),
+    path('categories/new/', CategoryCreateView.as_view(), name='category_create'),
     path('categories/', CategoryListView.as_view(), name='category_list'),
+    path('analytics/', AnalyticsView.as_view(), name='analytics'),
 ]

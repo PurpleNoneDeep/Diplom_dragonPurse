@@ -16,10 +16,10 @@ class Category(models.Model):
 
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)  # Заменяем поле на связь с категорией
+    date = models.DateTimeField(auto_now_add=False)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # Новое поле суммы
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     def __str__(self):
         return f"{self.date} - {self.category.name} - {self.description} - {self.amount}"

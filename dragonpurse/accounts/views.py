@@ -1,15 +1,53 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryForm
-from django.core.mail import send_mail
-from django.conf import settings
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import io
+import urllib, base64
+
+
+class AnalyticsView(View):
+    def get(self, request):
+        # Получаем все транзакции пользователя
+        transactions = Transaction.objects.filter(user=request.user)
+
+        # Создаем DataFrame для удобной работы с данными
+        df = pd.DataFrame(list(transactions.values('date', 'amount')))
+
+        # Разделяем доходы и расходы
+        df['type'] = df['amount'].apply(lambda x: 'Income' if x > 0 else 'Expense')
+        df['date'] = pd.to_datetime(df['date']).dt.to_period('M')  # Группируем по месяцам
+
+        # Группировка данных
+        summary = df.groupby(['date', 'type']).sum().unstack().fillna(0)
+
+        # Создание графика
+        plt.figure(figsize=(10, 6))
+        summary.plot(kind='bar', stacked=True)
+        plt.title('Транзакции за все время')
+        plt.xlabel('Дата (Месяц)')
+        plt.ylabel('Сумма')
+        plt.xticks(rotation=45)
+        plt.legend(title='Тип', labels=['Расходы', 'Доходы'])
+
+        # Сохранение графика в буфер
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+        buf.seek(0)
+        image_png = buf.getvalue()
+        graphic = base64.b64encode(image_png)
+        graphic = graphic.decode('utf-8')
+
+        return render(request, 'accounts/analytics.html', {'graphic': graphic})
 
 class CategoryListView(View):
     def get(self, request):
@@ -30,6 +68,12 @@ class CategoryCreateView(View):
             return redirect('category_list')  # Перенаправление на страницу списка категорий
         return render(request, 'accounts/category_form.html', {'form': form})
 
+class TransactionDeleteView(View):
+    def post(self, request, pk):
+        transaction = get_object_or_404(Transaction, id=pk, user=request.user)
+        transaction.delete()
+        return redirect('transaction_list')
+
 class TransactionListView(View):
     def get(self, request):
         today = timezone.now()
@@ -48,19 +92,39 @@ class TransactionListView(View):
 
 class TransactionCreateView(View):
     def get(self, request):
-        form = TransactionForm()
-        categories = Category.objects.filter(user=request.user)  # Получаем категории текущего пользователя
-        return render(request, 'accounts/transaction_form.html', {'form': form, 'categories': categories})
+        categories_income = list(
+            Category.objects.filter(category_type='income', user=request.user).values('id', 'name'))
+        categories_expense = list(
+            Category.objects.filter(category_type='expense', user=request.user).values('id', 'name'))
+        current_date = timezone.now().date()
+        return render(request, 'accounts/transaction_form.html', {
+            'categories_income': categories_income,
+            'categories_expense': categories_expense,
+            'form': TransactionForm(),
+            'current_date': current_date,
+        })
 
     def post(self, request):
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.user = request.user  # Привязываем транзакцию к текущему пользователю
-            transaction.save()
-            return redirect('transaction_list')  # Перенаправление на список транзакций
-        categories = Category.objects.filter(user=request.user)
-        return render(request, 'accounts/transaction_form.html', {'form': form, 'categories': categories})
+        category_id = request.POST.get('category')
+        description = request.POST.get('description')
+        amount = request.POST.get('amount')
+        # Получаем дату из формы, если не выбрана, используем текущую
+        date_str = request.POST.get('newdate')
+        if date_str:  # Проверяем, если дата была выбрана
+            date_num = timezone.datetime.strptime(date_str, '%Y-%m-%d')  # Преобразуем строку в объект даты
+            print(date_num)
+        else:
+            date_num = timezone.now()  # Используем текущую дату, если дата не выбрана
+
+        transaction = Transaction(
+            user=request.user,
+            category_id=category_id,
+            description=description,
+            amount=amount,
+            date=date_num  # Устанавливаем выбранную дату
+        )
+        transaction.save()
+        return redirect('transaction_list')
 
 class NotificationListView(LoginRequiredMixin, View):
     def get(self, request):
