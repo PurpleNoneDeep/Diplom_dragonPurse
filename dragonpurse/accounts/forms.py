@@ -11,7 +11,7 @@ class CategoryForm(forms.ModelForm):
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['category', 'description']  # Убираем transaction_type
+        fields = ['category', 'description', 'amount']
 
 class RegisterForm(forms.ModelForm):
     class Meta:

@@ -3,9 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <title>Список транзакций</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    .Calendar {
+        width: 100%; /* Занимает полную ширину родителя */
+    }
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        width: 20%;  /* Задаем ширину календаря 20% */
+        height: 30vh; /* Задаем высоту 20% от высоты окна */
+        margin-top: 20px;
+        border: 1px solid #ccc; /* Добавляем границу для визуализации */
+        overflow: auto; /* Позволяет прокручивать содержимое, если оно выходит за пределы */
+    }
+    .day {
+        padding: 2px;
+        border: 1px solid #ccc;
+        text-align: center;
+        height: 70%; /* Заполняет высоту родителя */
+    }
+    .header {
+        margin-bottom: 20px;
+    }
+    .weekdays {
+        display: contents;
+        font-weight: bold;
+    }
+    .weekdays div {
+        text-align: center;
+    }
+    button {
+        margin-top: 5px;
+    }
+</style>
 </head>
 <body>
-    <h1>Список транзакций</h1>
+    <div class="Calendar">
+        <div>
+            <h1>Фильтр календаря</h1>
+            <div class="header">
+                <select id="year-select"></select>
+                <select id="month-select"></select>
+                <select id="day-select"></select>
+                <button id="apply-button">Применить</button>
+            </div>
+            <div>
+                <button id="schedule-transaction-button">Запланировать транзакцию</button>
+                <button id="report-button">Составить отчет</button>
+                <a href="{% url 'transaction_create' %}">Добавить новую транзакцию</a>
+                <a href="{% url 'category_create' %}">Добавить новую категорию</a>
+                <a href="{% url 'category_create' %}">Запланировать транзакцию</a>
+            </div>
+        </div>
+
+        <div class="calendar" id="calendar"></div>
+        <script>
+            const calendarEl = document.getElementById('calendar');
+            const yearSelect = document.getElementById('year-select');
+            const monthSelect = document.getElementById('month-select');
+            const daySelect = document.getElementById('day-select');
+            const applyButton = document.getElementById('apply-button');
+
+            function populateYearSelect() {
+                const currentYear = new Date().getFullYear();
+                for (let year = currentYear - 10; year <= currentYear + 10; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                }
+                yearSelect.value = currentYear;
+            }
+
+            function populateMonthSelect() {
+                for (let month = 0; month < 12; month++) {
+                    const option = document.createElement('option');
+                    option.value = month;
+                    option.textContent = month + 1;
+                    monthSelect.appendChild(option);
+                }
+                monthSelect.value = new Date().getMonth();
+            }
+
+            function populateDaySelect(year, month) {
+                daySelect.innerHTML = '';
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const option = document.createElement('option');
+                    option.value = day;
+                    option.textContent = day;
+                    daySelect.appendChild(option);
+                }
+                daySelect.value = new Date().getDate();
+            }
+
+            function renderCalendar(year, month) {
+                calendarEl.innerHTML = '';
+
+                // Дни недели
+                const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                weekdays.forEach(day => {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day-weekdays';
+                    dayDiv.textContent = day;
+                    calendarEl.appendChild(dayDiv);
+                });
+
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDiv = document.createElement('div');
+                    calendarEl.appendChild(emptyDiv);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day';
+
+                    // Создание кнопки
+                    const button = document.createElement('button');
+                    button.textContent = day;
+                    button.className = 'day-button';
+                    button.style.width = '100%';
+                    button.style.height = '100%';
+
+                    // Добавляем обработчик события для кнопки
+                    button.addEventListener('click', () => {
+                        const selectedDate = `${year}-${month + 1}-${day}`; // Формат YYYY-MM-DD
+                        window.location.href = `?date=${selectedDate}`; // Переход к фильтрации по дате
+                    });
+
+                    // Добавляем кнопку в div дня
+                    dayDiv.appendChild(button);
+                    calendarEl.appendChild(dayDiv);
+                }
+            }
+        function updateCalendar() {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        populateDaySelect(year, month);
+        renderCalendar(year, month);
+    }
+
+    applyButton.addEventListener('click', updateCalendar);
+
+    // Инициализация
+    populateYearSelect();
+    populateMonthSelect();
+    updateCalendar();
+        </script>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -13,6 +167,7 @@
                 <th>Тип</th>
                 <th>Категория</th>
                 <th>Описание</th>
+                <th>Сумма</th>
             </tr>
         </thead>
         <tbody>
@@ -22,14 +177,15 @@
                     <td>{{ transaction.get_transaction_type_display }}</td>
                     <td>{{ transaction.category.name }}</td>
                     <td>{{ transaction.description }}</td>
+                    <td>{{ transaction.amount }}</td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">Нет транзакций.</td>
+                    <td colspan="5">Нет транзакций.</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'transaction_create' %}">Добавить новую транзакцию</a>
+
 </body>
 </html>
