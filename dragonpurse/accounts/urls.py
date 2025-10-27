@@ -1,9 +1,10 @@
 from django.urls import path
 from .views import LoginView, LogoutView, DashboardView, RegisterView, ProfileView, SettingsView, SharedAccountView, \
     NotificationListView, TransactionCreateView, TransactionListView, CategoryCreateView, CategoryListView, \
-    TransactionDeleteView, AnalyticsView
+    TransactionDeleteView, AnalyticsView, ReportView
 
 urlpatterns = [
+    path('', LoginView.as_view(), name='index'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
@@ -18,4 +19,5 @@ urlpatterns = [
     path('categories/new/', CategoryCreateView.as_view(), name='category_create'),
     path('categories/', CategoryListView.as_view(), name='category_list'),
     path('analytics/', AnalyticsView.as_view(), name='analytics'),
+    path('report/', ReportView.as_view(), name='report'),
 ]

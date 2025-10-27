@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <title>Аналитика транзакций</title>
 </head>
+<header>
+    <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
+    <a href="{% url 'transaction_list' %}">Составить отчет</a>
+</header>
 <body>
     <h1>Аналитика транзакций</h1>
     <div>
-        <img src="data:image/png;base64,{{ graphic }}" alt="График транзакций">
+        <img src="" alt="График транзакций">
     </div>
     <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
 </body>

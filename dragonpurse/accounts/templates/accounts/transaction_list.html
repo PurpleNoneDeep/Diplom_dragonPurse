@@ -54,7 +54,7 @@
             </div>
             <div>
                 <button id="schedule-transaction-button">Запланировать транзакцию</button>
-                <button id="report-button">Составить отчет</button>
+                <a href="{% url 'report' %}"><button id="report-button">Составить отчет</button></a>
                 <a href="{% url 'transaction_create' %}">Добавить новую транзакцию</a>
                 <a href="{% url 'category_create' %}">Добавить новую категорию</a>
                 <a href="{% url 'category_create' %}">Запланировать транзакцию</a>

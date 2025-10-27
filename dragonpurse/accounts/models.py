@@ -32,3 +32,65 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+
+class Settings(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
+    key = models.CharField(max_length=255)
+    value = models.TextField()
+
+    def __str__(self):
+        return f"{self.key}: {self.value} (User: {self.user.username})"
+
+
+class Analytics(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='analytics')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    income_sum = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    expense_sum = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"Analytics for {self.user.username} from {self.start_date} to {self.end_date}"
+
+class Dragon(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dragons')
+    mood = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Dragon of {self.user.username} - Mood: {self.mood}"
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlists')
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=50, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - Status: {self.status} (User: {self.user.username})"
+
+class PlannedExpense(models.Model):
+    REPEAT_CHOICES = [
+        ('daily', 'Раз в день'),
+        ('weekly', 'Раз в неделю'),
+        ('monthly', 'Раз в месяц'),
+        ('yearly', 'Раз в год'),
+    ]
+
+    STATUS_CHOICES = [
+        ('in_progress', 'В работе'),
+        ('completed', 'Выполнен'),
+        ('deferred', 'Перенос'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='planned_expenses')
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    date = models.DateField()
+    repeat = models.CharField(max_length=10, choices=REPEAT_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, null=True, blank=True)
+    reminder = models.BooleanField(default=False)
+    reminder_time = models.TimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - Status: {self.status} (User: {self.user.username})"

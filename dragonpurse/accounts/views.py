@@ -8,46 +8,20 @@ from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import io
-import urllib, base64
 
+class ReportView(View):
+    def get(self, request):
+
+        transactions = Transaction.objects.filter(user=request.user)
+        return render(request, 'accounts/report.html', {'transactions': transactions})
 
 class AnalyticsView(View):
     def get(self, request):
         # Получаем все транзакции пользователя
         transactions = Transaction.objects.filter(user=request.user)
 
-        # Создаем DataFrame для удобной работы с данными
-        df = pd.DataFrame(list(transactions.values('date', 'amount')))
 
-        # Разделяем доходы и расходы
-        df['type'] = df['amount'].apply(lambda x: 'Income' if x > 0 else 'Expense')
-        df['date'] = pd.to_datetime(df['date']).dt.to_period('M')  # Группируем по месяцам
-
-        # Группировка данных
-        summary = df.groupby(['date', 'type']).sum().unstack().fillna(0)
-
-        # Создание графика
-        plt.figure(figsize=(10, 6))
-        summary.plot(kind='bar', stacked=True)
-        plt.title('Транзакции за все время')
-        plt.xlabel('Дата (Месяц)')
-        plt.ylabel('Сумма')
-        plt.xticks(rotation=45)
-        plt.legend(title='Тип', labels=['Расходы', 'Доходы'])
-
-        # Сохранение графика в буфер
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        plt.close()
-        buf.seek(0)
-        image_png = buf.getvalue()
-        graphic = base64.b64encode(image_png)
-        graphic = graphic.decode('utf-8')
-
-        return render(request, 'accounts/analytics.html', {'graphic': graphic})
+        return render(request, 'accounts/analytics.html', )
 
 class CategoryListView(View):
     def get(self, request):

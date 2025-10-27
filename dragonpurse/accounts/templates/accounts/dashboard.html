@@ -3,9 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <title>Личный кабинет</title>
+    <style>
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+.card {
+            background-color: #131212;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #639372;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+.card:hover {
+            background-color: #639372;
+        }
+h1{
+    color: #639372;
+}
+h2 {
+            margin: 5 0 10px;
+            font-size: 1.5em;
+            color: #639372;
+}
+p {
+            font-size: 1.2em;
+            color: #639372;
+}
+label{
+    background-color: #131212;
+    color: #639372;
+    margin: 10px;
+}
+.transactions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color:#639372;
+        }
+.transaction {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eaeaea;
+}
+.transaction:last-child {
+    border-bottom: none;
+}
+.transaction div {
+    flex: 1;
+    text-align: center;
+}
+.dashboard-horizontal{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+button {
+    text-align: center;
+    margin: 5px;
+    border-radius: 15px;
+    background-color: #131212;
+    color: #639372;
+    width: 10em;
+    height: 3em;
+}
+table {
+    border-collapse: collapse;
+    width: 80%;
+    color: #639372;
+}
+
+th, td {
+    border: 2px solid #639372;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #639372;
+    color: #131212;
+}
+
+tr:hover {
+    background-color: #131212;
+}
+select {
+    background-color: #131212;
+    color: #639372;
+    font-size: 16px;        /* Размер шрифта */
+    padding: 10px;          /* Внутренний отступ */
+    border: 1px solid #639372;  /* Зеленая рамка */
+    border-radius: 5px;     /* Скругление углов */
+    width: 200px;           /* Ширина */
+    height: 40px;           /* Высота */
+    appearance: none;       /* Убираем стандартный стиль */
+    cursor: pointer;        /* Указатель при наведении */
+    position: relative;      /* Для позиционирования псевдоэлемента */
+}
+select::after {
+    content: '▼';           /* Стрелка вниз */
+    color: #639372;          /* Зеленый цвет стрелки */
+    position: absolute;      /* Абсолютное позиционирование */
+    right: 10px;            /* Отступ от правого края */
+    top: 50%;               /* Центр по вертикали */
+    transform: translateY(-50%); /* Центрирование стрелки */
+    pointer-events: none;   /* Игнорировать события на стрелке */
+}
+input{
+    background-color: #131212;
+    color: #639372;
+}
+    </style>
 </head>
+<header>
+        <div class="left">
+            <h1 class="text-gradient">ДракоФин</h1>
+        </div>
+
+</div>
+    </header>
 <body>
     <h1>Добро пожаловать в личный кабинет, {{ user.username }}!</h1>
     <a href="{% url 'logout' %}">Выйти</a>
+    <div class="buttons">
+        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <a href="{% url 'notifications' %}"><button>Уведомления</button></a>
+        <a href="{% url 'analytics' %}"><button>Аналитика</button></a>
+    </div>
+<main>
+    <div class="dashboard-horizontal">
+            <div>
+                <img src="" alt="Здесь будет картинка">
+            </div>
+        </div>
+        <div class="dashboard">
+            <a href="/" class="card">
+                <h2>Баланс (на дату)</h2>
+                <p>100,000 ₽</p>
+            </a>
+            <a href="/" class="card">
+                <h2>Доходы</h2>
+                <p>50,000 ₽</p>
+            </a>
+            <a href="/" class="card">
+                <h2>Расходы</h2>
+                <p>20,000 ₽</p>
+            </a>
+        </div>
+        <div class="dashboard-horizontal">
+
+</div>
+
+</main>
 </body>
 </html>

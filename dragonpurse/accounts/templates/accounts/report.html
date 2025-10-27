@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Составление отчета</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Составление отчета</h1>
+      <a href="{% url 'dashboard' %}"><button>Вернуться</button></a>
+        <form method="POST" >
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="start_date">Дата начала:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Дата конца:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Категория:</label>
+                <select id="category" name="category" required>
+                    <option value="">-- Выберите категорию --</option>
+                    <option value="category1">Категория 1</option>
+                    <option value="category2">Категория 2</option>
+                    <option value="category3">Категория 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="type">Тип:</label>
+                <select id="type" name="type" required>
+                    <option value="">-- Выберите тип --</option>
+                    <option value="income">Доходы</option>
+                    <option value="expenses">Расходы</option>
+                </select>
+            </div>
+            <button type="submit">Составить отчет</button>
+        </form>
+    </div>
+<table>
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th>Сумма</th>
+            <th>Действия</th> <!-- Новый заголовок для действий -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date }}</td>
+                <td>{{ transaction.get_transaction_type_display }}</td>
+                <td>{{ transaction.category.name }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>
+                    <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Нет транзакций.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
