@@ -2,17 +2,36 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аналитика транзакций</title>
 </head>
-<header>
-    <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
-    <a href="{% url 'transaction_list' %}">Составить отчет</a>
-</header>
 <body>
-    <h1>Аналитика транзакций</h1>
-    <div>
-        <img src="" alt="График транзакций">
-    </div>
-    <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
+    <h1>Анализ транзакций</h1>
+
+    <form method="GET">
+        <label for="start_date">С даты:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+
+        <label for="end_date">По дату:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+
+        <label for="category">Категория:</label>
+        <select id="category" name="category">
+            <option value="">--- Все категории ---</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id|stringformat:"d" == category_id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Фильтровать</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% else %}
+        <img src="data:image/png;base64,{{ plot_url }}" alt="График транзакций">
+    {% endif %}
 </body>
 </html>

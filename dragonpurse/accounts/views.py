@@ -7,21 +7,79 @@ from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryFor
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
+import matplotlib.pyplot as plt
+import numpy as np
+import io
+import base64
+from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Transaction
+import datetime
+from decimal import Decimal
 
+
+class AnalyticsView(View):
+    def get(self, request):
+        categories = Category.objects.all()
+
+        # Фильтры
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        category_id = request.GET.get('category')
+
+        # Применение фильтров
+        transactions = Transaction.objects.all()
+        if start_date:
+            transactions = transactions.filter(date__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(date__lte=end_date)
+        if category_id:
+            transactions = transactions.filter(category_id=category_id)
+
+        dates = []
+        amounts = []
+        print("something3")
+        for transaction in transactions:
+            # Проверка типов данных
+            if isinstance(transaction.date, datetime.date):
+                print("something1")
+                dates.append(transaction.date)
+            if isinstance(transaction.amount, (int, Decimal)):
+                amounts.append(float(transaction.amount))
+                print("something2")
+
+        # Проверка на совпадение размеров
+        if len(dates) == 0 or len(amounts) == 0:
+            return render(request, 'accounts/analytics.html', {'error': 'Нет доступных данных для построения графика.'})
+
+        # Убедитесь, что длины совпадают
+        if len(dates) != len(amounts):
+            return render(request, 'accounts/analytics.html', {'error': 'Данные о транзакциях неполные.'})
+
+        # Создание графика
+        plt.figure()
+        plt.plot(dates, amounts, marker='o')
+        plt.title('Транзакции')
+        plt.xlabel('Дата')
+        plt.ylabel('Сумма')
+        plt.xticks(rotation=90)
+
+        # Сохранение графика в буфер
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close()
+
+        return render(request, 'accounts/analytics.html',
+                      {'plot_url': image_base64, 'categories': categories, 'start_date': start_date,
+                       'end_date': end_date, 'category_id': category_id})
 
 class ReportView(View):
     def get(self, request):
 
         transactions = Transaction.objects.filter(user=request.user)
         return render(request, 'accounts/report.html', {'transactions': transactions})
-
-class AnalyticsView(View):
-    def get(self, request):
-        # Получаем все транзакции пользователя
-        transactions = Transaction.objects.filter(user=request.user)
-
-
-        return render(request, 'accounts/analytics.html', )
 
 class CategoryListView(View):
     def get(self, request):
@@ -182,3 +240,4 @@ class LogoutView(View):
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, 'accounts/dashboard.html')
+
