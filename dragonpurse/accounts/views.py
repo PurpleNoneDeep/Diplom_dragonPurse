@@ -7,13 +7,14 @@ from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryFor
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
+import matplotlib
+matplotlib.use('Agg')  # Установка неинтерактивного бэкенда перед импортом pyplot
 import matplotlib.pyplot as plt
-import numpy as np
 import io
 import base64
 from django.http import HttpResponse
 from django.shortcuts import render
-from .models import Transaction
+from .models import Transaction, Category
 import datetime
 from decimal import Decimal
 
@@ -38,15 +39,15 @@ class AnalyticsView(View):
 
         dates = []
         amounts = []
-        print("something3")
+
         for transaction in transactions:
-            # Проверка типов данных
+
             if isinstance(transaction.date, datetime.date):
-                print("something1")
+
                 dates.append(transaction.date)
             if isinstance(transaction.amount, (int, Decimal)):
                 amounts.append(float(transaction.amount))
-                print("something2")
+
 
         # Проверка на совпадение размеров
         if len(dates) == 0 or len(amounts) == 0:
@@ -73,7 +74,7 @@ class AnalyticsView(View):
 
         return render(request, 'accounts/analytics.html',
                       {'plot_url': image_base64, 'categories': categories, 'start_date': start_date,
-                       'end_date': end_date, 'category_id': category_id})
+                       'end_date': end_date, 'category_id': category_id, 'transactions': transactions})
 
 class ReportView(View):
     def get(self, request):
