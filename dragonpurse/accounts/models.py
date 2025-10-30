@@ -94,3 +94,27 @@ class PlannedExpense(models.Model):
 
     def __str__(self):
         return f"{self.name} - Status: {self.status} (User: {self.user.username})"
+
+
+class Goal(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'В ожидании'),
+        ('in_progress', 'В процессе'),
+        ('completed', 'Завершено'),
+    ]
+
+    name = models.CharField(max_length=255, verbose_name='Название')
+    description = models.TextField(verbose_name='Описание', blank=True)
+    deadline = models.DateField(verbose_name='Дедлайн')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Статус')
+
+    def __str__(self):
+        return self.name
+
+class UserGoal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_goals')
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='user_goals')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Сумма')
+
+    def __str__(self):
+        return f'{self.user.username} - {self.goal.name}'
