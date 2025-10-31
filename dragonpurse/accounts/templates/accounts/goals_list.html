@@ -1,0 +1,49 @@
+
+{% block content %}
+<h1>Мои цели</h1>
+
+<table class="goals-table" style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Дедлайн</th>
+            <th>Цель</th>
+            <th>Накоплено</th>
+            <th>Прогресс</th>
+            <th>Статус</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for g in goals_data %}
+        <tr>
+            <td>{{ g.name }}</td>
+            <td>{{ g.deadline }}</td>
+            <td>{{ g.amount|floatformat:2 }} ₽</td>
+            <td>{{ g.saved|floatformat:2 }} ₽</td>
+
+            <td style="min-width:200px;">
+                <div style="position:relative; width:100%; height:20px; background-color:#eee; border-radius:10px;">
+
+                    <div style="width:{{ g.percent }}%; background-color:{{ g.color }}; height:100%; border-radius:10px; text-align:center; color:white; font-size:12px;">
+                        {{ g.percent }}%
+                    </div>
+                </div>
+            </td>
+            <td>{{ g.status }}</td>
+            <td>
+                <a href="{% url 'goal_detail' goal_id=forloop.counter0|add:1 %}" class="button">Посмотреть детали</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center;">Пока нет целей</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top:20px;">
+    <a href="{% url 'add_goal' %}" class="button">➕ Добавить цель</a>
+</div>
+{% endblock %}

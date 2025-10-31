@@ -16,13 +16,14 @@ class Category(models.Model):
 
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goal = models.ForeignKey('Goal', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')  # ← ДОБАВИЛИ
     date = models.DateTimeField(auto_now_add=False)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     def __str__(self):
-        return f"{self.date} - {self.category.name} - {self.description} - {self.amount}"
+        return f"{self.date} - {self.category.name if self.category else 'Без категории'} - {self.description} - {self.amount}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

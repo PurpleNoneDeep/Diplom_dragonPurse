@@ -147,25 +147,25 @@ input{
             <div>
                 <img src="" alt="Здесь будет картинка">
             </div>
-        </div>
-        <div class="dashboard">
-            <a href="/" class="card">
-                <h2>Баланс (на дату)</h2>
-                <p>100,000 ₽</p>
-            </a>
-            <a href="/" class="card">
-                <h2>Доходы</h2>
-                <p>50,000 ₽</p>
-            </a>
-            <a href="/" class="card">
-                <h2>Расходы</h2>
-                <p>20,000 ₽</p>
-            </a>
-        </div>
+    </div>
+    <div class="dashboard">
+        <a href="/" class="card">
+        <h2>Баланс (на дату)</h2>
+        <p>{{ balance|floatformat:2 }} ₽</p>
+        </a>
+        <a href="/" class="card">
+            <h2>Доходы</h2>
+            <p>{{ income_total|floatformat:2 }} ₽</p>
+        </a>
+        <a href="/" class="card">
+            <h2>Расходы</h2>
+            <p>{{ expense_total|floatformat:2 }} ₽</p>
+        </a>
+    </div>
+
         <div class="dashboard-horizontal">
-
+            <p>Аналитика</p>
 </div>
-
 </main>
 </body>
 </html>

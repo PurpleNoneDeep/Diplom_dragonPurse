@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>🎯 {{ goal.name }}</h1>
+
+<p><strong>Описание:</strong> {{ goal.description }}</p>
+<p><strong>Дедлайн:</strong> {{ goal.deadline }}</p>
+<p><strong>Статус:</strong> {{ goal.get_status_display }}</p>
+
+<h3>💰 Прогресс накопления:</h3>
+<div style="width:100%; background-color:#eee; border-radius:10px; height:25px;">
+  <div style="width:{{ percent }}%; background-color:#4caf50; height:100%; border-radius:10px; color:white; text-align:center; line-height:25px;">
+    {{ percent }}%
+  </div>
+</div>
+<p><strong>Накоплено:</strong> {{ total_saved|floatformat:2 }} ₽ из {{ total_goal_amount|floatformat:2 }} ₽</p>
+
+<hr>
+
+<h3>👥 Участники</h3>
+<table border="1" cellpadding="8" style="border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>Пользователь</th>
+      <th>Целевая сумма</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in participants %}
+    <tr>
+      <td>{{ p.user.username }} ({{ p.user.email }})</td>
+      <td>{{ p.amount|floatformat:2 }} ₽</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>📜 Транзакции</h3>
+<table border="1" cellpadding="8" style="border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>Дата</th>
+      <th>Пользователь</th>
+      <th>Категория</th>
+      <th>Описание</th>
+      <th>Сумма</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in transactions %}
+    <tr>
+      <td>{{ t.date|date:"d.m.Y H:i" }}</td>
+      <td>{{ t.user.username }}</td>
+      <td>{{ t.category.name if t.category else "Без категории" }}</td>
+      <td>{{ t.description }}</td>
+      <td>{{ t.amount|floatformat:2 }} ₽</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5" style="text-align:center;">Пока нет транзакций</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div style="margin-top:20px;">
+  <a href="{% url 'yourapp:goals_list' %}" class="button">⬅ Назад к целям</a>
+</div>
+{% endblock %}

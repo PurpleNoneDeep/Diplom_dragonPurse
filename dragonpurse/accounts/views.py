@@ -1,33 +1,187 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, authenticate, logout
+from django.db.models import Sum
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryForm
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
 import matplotlib
-matplotlib.use('Agg')  # Установка неинтерактивного бэкенда перед импортом pyplot
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
-from django.http import HttpResponse
-from django.shortcuts import render
 from .models import Transaction, Category
 import datetime
 from decimal import Decimal
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
+from .forms import GoalForm
+from .models import Goal, UserGoal
+from django.shortcuts import get_object_or_404
+User = get_user_model()
 
+@login_required
+def goal_detail(request, goal_id):
+    """
+    Подробная страница цели:
+    - информация о цели
+    - участники и их доли
+    - транзакции, связанные с этой целью
+    """
+    goal = get_object_or_404(Goal, id=goal_id)
+    user = request.user
+
+    # Проверяем, что пользователь участвует в цели
+    if not UserGoal.objects.filter(goal=goal, user=user).exists():
+        messages.error(request, "Вы не участвуете в этой цели.")
+        return redirect('yourapp:goals_list')
+
+    # Все участники
+    participants = UserGoal.objects.filter(goal=goal).select_related('user')
+
+    # Транзакции по этой цели
+    transactions = Transaction.objects.filter(goal=goal).select_related('user', 'category')
+
+    # Общая сумма накопленного (всеми участниками)
+    total_saved = sum(t.amount for t in transactions)
+
+    # Общая цель
+    total_goal_amount = sum(u.amount for u in participants)
+
+    # Процент выполнения
+    percent = (total_saved / total_goal_amount * 100) if total_goal_amount > 0 else 0
+
+    context = {
+        'goal': goal,
+        'participants': participants,
+        'transactions': transactions,
+        'total_saved': total_saved,
+        'total_goal_amount': total_goal_amount,
+        'percent': round(percent, 2),
+    }
+
+    return render(request, 'yourapp/goal_detail.html', context)
+
+
+
+@login_required
+def goals_list(request):
+    user = request.user
+    user_goals = UserGoal.objects.filter(user=user).select_related('goal')
+
+    goals_data = []
+    for user_goal in user_goals:
+        goal = user_goal.goal
+
+        # Сумма транзакций, связанных с этой целью
+        total_saved = (
+            Transaction.objects.filter(user=user, goal=goal)
+            .aggregate(total=Sum('amount'))['total'] or 0
+        )
+
+        # Процент накопления
+        percent = 0
+        if user_goal.amount > 0:
+            percent = (total_saved / user_goal.amount) * 100
+
+        # Статус цели: если процент 100 — автоматически completed
+        if percent >= 100 and goal.status != 'completed':
+            goal.status = 'completed'
+            goal.save()
+        if percent < 33:
+            color = '#f44336'
+        elif percent < 66:
+            color = '#ff9800'
+        else:
+            color = '#4caf50'
+        # внутри цикла for user_goal in user_goals:
+        goals_data.append({
+            'id': goal.id,  # <--- добавляем
+            'name': goal.name,
+            'description': goal.description,
+            'deadline': goal.deadline,
+            'amount': user_goal.amount,
+            'status': goal.get_status_display(),
+            'percent': round(percent, 2),
+            'saved': total_saved,
+            'color': color,
+        })
+
+    context = {'goals_data': goals_data}
+    return render(request, 'accounts/goals_list.html', context)
+
+@login_required
+def add_goal(request):
+    """
+    Создаёт Goal и соответствующие UserGoal — сумма распределяется поровну
+    между участниками. Если пользователя с email не существует, создаём
+    временного (is_active=False) пользователя с unusable password.
+    """
+    if request.method == 'POST':
+        form = GoalForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                goal = form.save()  # сохраняем Goal (name, description, deadline, status)
+                total_amount = form.cleaned_data['amount']  # Decimal
+                emails = list(form.cleaned_data['participants'])  # список email
+
+                # добавить текущего пользователя, если у него есть email и он не в списке
+                if request.user.email and request.user.email not in emails:
+                    emails.append(request.user.email)
+
+                # если совсем нет участников — наименее странное поведение: назначаем текущего пользователя
+                if not emails:
+                    emails = [request.user.email]
+
+                # Получаем/создаём пользователей
+                participants = []
+                for email in emails:
+                    # username: локальная часть + случайная строка, чтобы избежать конфликтов
+                    defaults = {
+                        'username': email.split('@')[0] + get_random_string(6),
+                        'is_active': False,
+                    }
+                    user, created = User.objects.get_or_create(email=email, defaults=defaults)
+                    if created:
+                        # делаем пароль недоступным (пользователь не может залогиниться)
+                        user.set_unusable_password()
+                        user.save()
+                    participants.append(user)
+
+                # распределяем сумму поровну с учётом округления до 2 знаков:
+                num = len(participants)
+                share = (total_amount / Decimal(num)).quantize(Decimal('0.01'))
+                total_assigned = share * num
+                remainder = total_amount - total_assigned  # может быть 0.01/0.02 и т.д.
+
+                for i, user in enumerate(participants):
+                    user_amount = share
+                    # добавляем остаток к первому участнику (можно изменить логику)
+                    if i == 0 and remainder != Decimal('0.00'):
+                        user_amount += remainder
+                    UserGoal.objects.create(user=user, goal=goal, amount=user_amount)
+
+            messages.success(request, 'Цель успешно создана.')
+            # перенаправь на нужную страницу: список целей или детали
+            return redirect('goals_list')  # замени на реальный URL name
+    else:
+        form = GoalForm()
+
+    return render(request, 'accounts/add_goal.html', {'form': form})
 
 class AnalyticsView(View):
     def get(self, request):
         categories = Category.objects.all()
-
         # Фильтры
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
         category_id = request.GET.get('category')
-
         # Применение фильтров
         transactions = Transaction.objects.all()
         if start_date:
@@ -240,5 +394,30 @@ class LogoutView(View):
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
-        return render(request, 'accounts/dashboard.html')
+        user = request.user
 
+        # Сумма всех доходов
+        income_total = (
+                Transaction.objects.filter(
+                    user=user,
+                    category__category_type='income'
+                ).aggregate(total=Sum('amount'))['total'] or 0
+        )
+
+        # Сумма всех расходов
+        expense_total = (
+                Transaction.objects.filter(
+                    user=user,
+                    category__category_type='expense'
+                ).aggregate(total=Sum('amount'))['total'] or 0
+        )
+
+        # Баланс = доходы - расходы
+        balance = income_total - expense_total
+
+        context = {
+            'balance': balance,
+            'income_total': income_total,
+            'expense_total': expense_total,
+        }
+        return render(request, 'accounts/dashboard.html', context)

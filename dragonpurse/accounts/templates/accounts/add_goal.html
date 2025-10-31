@@ -1,0 +1,49 @@
+
+
+{% block content %}
+  <h1>Добавить цель</h1>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div>
+      {{ form.name.label_tag }}<br>
+      {{ form.name }}{{ form.name.errors }}
+    </div>
+
+    <div>
+      {{ form.description.label_tag }}<br>
+      {{ form.description }}{{ form.description.errors }}
+    </div>
+
+    <div>
+      {{ form.deadline.label_tag }}<br>
+      {{ form.deadline }}{{ form.deadline.errors }}
+    </div>
+
+    <div>
+      {{ form.status.label_tag }}<br>
+      {{ form.status }}{{ form.status.errors }}
+    </div>
+
+    <div>
+      {{ form.amount.label_tag }}<br>
+      {{ form.amount }}{{ form.amount.errors }}
+    </div>
+
+    <div>
+      {{ form.participants.label_tag }}<br>
+      {{ form.participants }}{{ form.participants.errors }}
+      <small>{{ form.participants.help_text }}</small>
+    </div>
+
+    <button type="submit">Добавить цель</button>
+  </form>
+{% endblock %}

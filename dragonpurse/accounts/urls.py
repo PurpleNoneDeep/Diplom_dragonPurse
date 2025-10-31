@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import LoginView, LogoutView, DashboardView, RegisterView, ProfileView, SettingsView, SharedAccountView, \
     NotificationListView, TransactionCreateView, TransactionListView, CategoryCreateView, CategoryListView, \
-    TransactionDeleteView, AnalyticsView, ReportView
+    TransactionDeleteView, AnalyticsView, ReportView, add_goal, goals_list, goal_detail
 
 urlpatterns = [
     path('', LoginView.as_view(), name='index'),
@@ -20,4 +20,7 @@ urlpatterns = [
     path('categories/', CategoryListView.as_view(), name='category_list'),
     path('analytics/', AnalyticsView.as_view(), name='analytics'),
     path('report/', ReportView.as_view(), name='report'),
+    path('goals/add/', add_goal, name='add_goal'),
+    path('goals/', goals_list, name='goals_list'),
+    path('goals/<int:goal_id>/', goal_detail, name='goal_detail'),
 ]
