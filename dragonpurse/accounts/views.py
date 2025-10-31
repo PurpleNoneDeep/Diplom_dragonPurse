@@ -25,16 +25,85 @@ from .forms import GoalForm
 from .models import Goal, UserGoal
 from django.shortcuts import get_object_or_404
 User = get_user_model()
-
-from .models import Wishlist
 from .forms import WishlistForm
-
-
-
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import PlannedExpense, Notification
 from .forms import PlannedExpenseForm
+from django.db import models
+
+from .models import SharedAccessInvite, SharedAccess, Notification, Wishlist
+from .forms import SharedAccessInviteForm
+
+
+
+@login_required
+def shared_account_view(request):
+    if request.method == 'POST':
+        form = SharedAccessInviteForm(request.POST)
+        if form.is_valid():
+            receiver = form.cleaned_data['receiver_email']
+            message_text = form.cleaned_data['message']
+
+            # Проверим, не было ли уже приглашения
+            existing = SharedAccessInvite.objects.filter(
+                sender=request.user,
+                receiver=receiver,
+                status='pending'
+            ).exists()
+            if existing:
+                messages.warning(request, "Приглашение этому пользователю уже отправлено и ожидает ответа.")
+            else:
+                SharedAccessInvite.objects.create(
+                    sender=request.user,
+                    receiver=receiver,
+                    message=message_text
+                )
+                Notification.objects.create(
+                    user=receiver,
+                    message=f"🔔 {request.user.username} пригласил(а) вас к совместному доступу к данным."
+                )
+                messages.success(request, "Приглашение успешно отправлено!")
+            return redirect('shared_account')
+    else:
+        form = SharedAccessInviteForm()
+
+    return render(request, 'accounts/shared_account.html', {'form': form})
+
+
+@login_required
+def invites_list(request):
+    invites = SharedAccessInvite.objects.filter(receiver=request.user).order_by('-created_at')
+    return render(request, 'accounts/invites_list.html', {'invites': invites})
+
+
+@login_required
+def handle_invite(request, invite_id, action):
+    invite = get_object_or_404(SharedAccessInvite, id=invite_id, receiver=request.user)
+
+    if action == 'accept':
+        invite.status = 'accepted'
+        SharedAccess.objects.get_or_create(
+            owner=invite.sender,
+            shared_with=invite.receiver
+        )
+        Notification.objects.create(
+            user=invite.sender,
+            message=f"✅ {invite.receiver.username} принял(а) приглашение к совместному доступу!"
+        )
+        messages.success(request, f"Вы приняли приглашение от {invite.sender.username}.")
+    elif action == 'decline':
+        invite.status = 'declined'
+        Notification.objects.create(
+            user=invite.sender,
+            message=f"❌ {invite.receiver.username} отклонил(а) приглашение к совместному доступу."
+        )
+        messages.info(request, f"Вы отклонили приглашение от {invite.sender.username}.")
+    invite.save()
+    return redirect('invites_list')
+
+
+
 
 @login_required
 def planned_expense_list(request):
@@ -100,10 +169,6 @@ def planned_expense_delete(request, pk):
     return render(request, 'accounts/planned_expense_confirm_delete.html', {'planned': planned})
 
 
-@login_required
-def wishlist_list(request):
-    wishlists = Wishlist.objects.filter(user=request.user)
-    return render(request, 'accounts/wishlist_list.html', {'wishlists': wishlists})
 
 @login_required
 def wishlist_create(request):
@@ -411,10 +476,10 @@ class TransactionCreateView(View):
         messages.success(request, 'Транзакция успешно добавлена.')
         return redirect('transaction_list')
 
-class NotificationListView(LoginRequiredMixin, View):
-    def get(self, request):
-        notifications = Notification.objects.filter(user=request.user)
-        return render(request, 'accounts/notifications.html', {'notifications': notifications})
+@login_required
+def notifications_list(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'accounts/notifications.html', {'notifications': notifications})
 
 
 class SharedAccountView(View):
@@ -519,3 +584,10 @@ class DashboardView(LoginRequiredMixin, View):
             'expense_total': expense_total,
         }
         return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+def wishlist_list(request):
+    shared_users = SharedAccess.objects.filter(shared_with=request.user).values_list('owner', flat=True)
+    wishlists = Wishlist.objects.filter(models.Q(user=request.user) | models.Q(user__in=shared_users))
+    return render(request, 'accounts/wishlist_list.html', {'wishlists': wishlists})

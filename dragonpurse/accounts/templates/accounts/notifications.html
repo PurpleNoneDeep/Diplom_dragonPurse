@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Уведомления</title>
-</head>
-<body>
-    <h1>Уведомления</h1>
-    {% if notifications %}
-        <ul>
-            {% for notification in notifications %}
-                <li>{{ notification.message }} ({{ notification.created_at }})</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>У вас нет уведомлений.</p>
-    {% endif %}
-    <a href="{% url 'profile' %}">Назад к профилю</a>
-</body>
-</html>
+{% block content %}
+<h1> Напоминания</h1>
+
+{% if notifications %}
+<ul>
+  {% for n in notifications %}
+  <li>
+    <strong>{{ n.created_at|date:"d.m.Y H:i" }}</strong> — {{ n.message }}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>Пока нет уведомлений </p>
+{% endif %}
+{% endblock %}

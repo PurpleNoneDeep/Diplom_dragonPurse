@@ -8,6 +8,25 @@ from django import forms
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .models import Goal, Wishlist
+from .models import SharedAccessInvite
+
+class SharedAccessInviteForm(forms.ModelForm):
+    receiver_email = forms.EmailField(label="Email получателя")
+
+    class Meta:
+        model = SharedAccessInvite
+        fields = ['receiver_email', 'message']
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Комментарий (необязательно)...'}),
+        }
+
+    def clean_receiver_email(self):
+        email = self.cleaned_data['receiver_email']
+        try:
+            receiver = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise forms.ValidationError("Пользователь с таким email не найден.")
+        return receiver
 
 class PlannedExpenseForm(forms.ModelForm):
     class Meta:

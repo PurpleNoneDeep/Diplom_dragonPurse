@@ -4,7 +4,7 @@
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit" class="button">💾 Сохранить</button>
-  <a href="{% url 'wishlist_list' %}" class="button">⬅ Назад</a>
+  <button type="submit" class="button">Сохранить</button>
+  <a href="{% url 'wishlist_list' %}" class="button">Назад</a>
 </form>
 {% endblock %}

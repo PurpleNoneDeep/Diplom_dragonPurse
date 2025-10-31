@@ -1,0 +1,22 @@
+{% block content %}
+<h1>Приглашения</h1>
+{% if invites %}
+  <ul>
+    {% for i in invites %}
+      <li>
+        <strong>{{ i.sender.username }}</strong> пригласил(а) вас к совместному доступу.<br>
+        {% if i.message %}<em>Сообщение:</em> {{ i.message }}<br>{% endif %}
+        <small>{{ i.created_at|date:"d.m.Y H:i" }}</small><br>
+        {% if i.status == 'pending' %}
+          <a href="{% url 'handle_invite' i.id 'accept' %}">Принять</a> |
+          <a href="{% url 'handle_invite' i.id 'decline' %}">Отклонить</a>
+        {% else %}
+          Статус: {{ i.get_status_display }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Нет входящих приглашений.</p>
+{% endif %}
+{% endblock %}

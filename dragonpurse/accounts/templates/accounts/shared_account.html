@@ -2,20 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Совместный аккаунт</title>
+    <title>Совместный доступ</title>
 </head>
 <body>
-    <h1>Совместный аккаунт</h1>
-    {% if messages %}
-        {% for message in messages %}
-            <p style="color:red;">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Отправить приглашение</button>
-    </form>
-    <a href="{% url 'profile' %}">Назад к профилю</a>
+<h1>Совместный доступ</h1>
+{% if messages %}
+  {% for message in messages %}
+    <p style="color:green;">{{ message }}</p>
+  {% endfor %}
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Отправить приглашение</button>
+</form>
+
+<hr>
+
+<p><a href="{% url 'invites_list' %}">📨 Мои приглашения</a></p>
+<p><a href="{% url 'profile' %}">⬅ Назад к профилю</a></p>
 </body>
 </html>
