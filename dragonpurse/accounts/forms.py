@@ -1,13 +1,37 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Transaction, Category
+from .models import Transaction, Category, PlannedExpense
 import re
 import datetime
 from django import forms
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from .models import Goal
+from .models import Goal, Wishlist
+
+class PlannedExpenseForm(forms.ModelForm):
+    class Meta:
+        model = PlannedExpense
+        fields = ['name', 'description', 'date', 'repeat', 'status', 'reminder', 'reminder_time']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название транзакции'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'repeat': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'reminder': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'reminder_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        }
+
+class WishlistForm(forms.ModelForm):
+    class Meta:
+        model = Wishlist
+        fields = ['name', 'description', 'status']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название желания'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
+            'status': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Статус (например: Хочу / В процессе / Куплено)'}),
+        }
 
 class GoalForm(forms.ModelForm):
     amount = forms.DecimalField(
@@ -63,7 +87,15 @@ class CategoryForm(forms.ModelForm):
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['category', 'description', 'amount']
+        fields = ['date', 'category', 'description', 'amount', 'goal', 'goal_amount']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['goal'].queryset = Goal.objects.filter(user_goals__user=user)
+        self.fields['goal'].required = False
+        self.fields['goal_amount'].required = False
 
 class RegisterForm(forms.ModelForm):
     class Meta:

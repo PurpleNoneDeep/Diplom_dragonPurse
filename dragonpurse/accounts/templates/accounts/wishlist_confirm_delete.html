@@ -1,0 +1,10 @@
+{% block content %}
+<h2>Удалить желание</h2>
+<p>Вы действительно хотите удалить «{{ wishlist.name }}»?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="button" style="background:red;">🗑 Удалить</button>
+  <a href="{% url 'wishlist_list' %}" class="button">Отмена</a>
+</form>
+{% endblock %}

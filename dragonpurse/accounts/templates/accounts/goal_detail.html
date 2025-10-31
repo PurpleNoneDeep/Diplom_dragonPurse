@@ -1,23 +1,23 @@
-{% extends "base.html" %}
+
 
 {% block content %}
-<h1>🎯 {{ goal.name }}</h1>
+<h1>{{ goal.name }}</h1>
 
 <p><strong>Описание:</strong> {{ goal.description }}</p>
 <p><strong>Дедлайн:</strong> {{ goal.deadline }}</p>
 <p><strong>Статус:</strong> {{ goal.get_status_display }}</p>
 
-<h3>💰 Прогресс накопления:</h3>
+<h3>Прогресс накопления:</h3>
 <div style="width:100%; background-color:#eee; border-radius:10px; height:25px;">
   <div style="width:{{ percent }}%; background-color:#4caf50; height:100%; border-radius:10px; color:white; text-align:center; line-height:25px;">
     {{ percent }}%
   </div>
 </div>
-<p><strong>Накоплено:</strong> {{ total_saved|floatformat:2 }} ₽ из {{ total_goal_amount|floatformat:2 }} ₽</p>
+<p><strong>Накоплено:</strong> {{ total_saved|floatformat:2 }} BYN из {{ total_goal_amount|floatformat:2 }} BYN</p>
 
 <hr>
 
-<h3>👥 Участники</h3>
+<h3>Участники</h3>
 <table border="1" cellpadding="8" style="border-collapse:collapse;">
   <thead>
     <tr>
@@ -37,7 +37,7 @@
 
 <hr>
 
-<h3>📜 Транзакции</h3>
+<h3>Транзакции</h3>
 <table border="1" cellpadding="8" style="border-collapse:collapse;">
   <thead>
     <tr>
@@ -53,7 +53,11 @@
     <tr>
       <td>{{ t.date|date:"d.m.Y H:i" }}</td>
       <td>{{ t.user.username }}</td>
-      <td>{{ t.category.name if t.category else "Без категории" }}</td>
+      <td>{% if t.category %}
+    {{ t.category.name }}
+{% else %}
+    Без категории
+{% endif %}</td>
       <td>{{ t.description }}</td>
       <td>{{ t.amount|floatformat:2 }} ₽</td>
     </tr>
@@ -66,6 +70,6 @@
 </table>
 
 <div style="margin-top:20px;">
-  <a href="{% url 'yourapp:goals_list' %}" class="button">⬅ Назад к целям</a>
+  <a href="{% url 'goals_list' %}" class="button">⬅ Назад к целям</a>
 </div>
 {% endblock %}

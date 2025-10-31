@@ -1,0 +1,39 @@
+{% block content %}
+<h1>Запланированные транзакции</h1>
+
+<a href="{% url 'planned_expense_create' %}" class="button">Добавить</a>
+
+{% if planned_items %}
+<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%; margin-top:10px;">
+  <thead style="background:#f5f5f5;">
+    <tr>
+      <th>Название</th>
+      <th>Описание</th>
+      <th>Дата</th>
+      <th>Повторение</th>
+      <th>Статус</th>
+      <th>Напоминание</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in planned_items %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.description|default:"—" }}</td>
+      <td>{{ item.date|date:"d.m.Y" }}</td>
+      <td>{{ item.get_repeat_display|default:"—" }}</td>
+      <td>{{ item.get_status_display|default:"—" }}</td>
+      <td>{% if item.reminder %}✅{% else %}—{% endif %}</td>
+      <td>
+        <a href="{% url 'planned_expense_edit' item.pk %}">Изменить</a> |
+        <a href="{% url 'planned_expense_delete' item.pk %}">Удалить</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Нет запланированных транзакций. Добавьте первую!</p>
+{% endif %}
+{% endblock %}

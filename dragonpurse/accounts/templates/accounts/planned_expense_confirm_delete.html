@@ -1,0 +1,10 @@
+{% block content %}
+<h2>Удалить запланированную транзакцию</h2>
+<p>Вы уверены, что хотите удалить «{{ planned.name }}»?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="button" style="background:red;">🗑 Удалить</button>
+  <a href="{% url 'planned_expense_list' %}" class="button">Отмена</a>
+</form>
+{% endblock %}

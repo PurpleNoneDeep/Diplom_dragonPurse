@@ -23,7 +23,20 @@
 
         <label for="newdate">Дата:</label>
         <input type="date" name="newdate" id="newdate" value="{{ current_date }}" />
+        <div class="form-group">
+    <label for="goal">Цель (если хотите отчислить часть дохода):</label>
+    <select name="goal" id="goal" class="form-control">
+      <option value="">— не выбрано —</option>
+      {% for goal in goals %}
+        <option value="{{ goal.id }}">{{ goal.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
+  <div class="form-group">
+    <label for="goal_amount">Сумма для цели:</label>
+    <input type="number" step="0.01" name="goal_amount" id="goal_amount" class="form-control" placeholder="Например, 5000">
+  </div>
         <button type="submit">Добавить транзакцию</button>
     </form>
     <a href="{% url 'transaction_list' %}">Назад к списку транзакций</a>

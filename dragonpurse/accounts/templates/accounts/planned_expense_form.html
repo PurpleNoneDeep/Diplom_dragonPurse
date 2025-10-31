@@ -1,0 +1,9 @@
+{% block content %}
+<h2>{{ title }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="button">Сохранить</button>
+  <a href="{% url 'planned_expense_list' %}" class="button">Назад</a>
+</form>
+{% endblock %}

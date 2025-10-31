@@ -1,0 +1,33 @@
+{% block content %}
+<h1>Мой Wishlist</h1>
+
+<a href="{% url 'wishlist_create' %}" class="button" style="margin-bottom:15px; display:inline-block;">➕ Добавить желание</a>
+
+{% if wishlists %}
+<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;">
+  <thead style="background:#f8f8f8;">
+    <tr>
+      <th>Название</th>
+      <th>Описание</th>
+      <th>Статус</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for w in wishlists %}
+    <tr>
+      <td>{{ w.name }}</td>
+      <td>{{ w.description|default:"—" }}</td>
+      <td>{{ w.status|default:"—" }}</td>
+      <td>
+        <a href="{% url 'wishlist_edit' w.pk %}">Изменить</a> |
+        <a href="{% url 'wishlist_delete' w.pk %}">Корзина</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Пока нет желаний. Добавь первое!</p>
+{% endif %}
+{% endblock %}
