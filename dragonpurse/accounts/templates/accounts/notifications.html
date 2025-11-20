@@ -1,15 +1,35 @@
+{% extends "accounts/base.html" %}
 {% block content %}
-<h1> Напоминания</h1>
+<div class="notifications-container" style="display: flex; gap: 20px;">
+<aside style="width: 200px;">
+<ul>
+<li><a href="{% url 'notifications_inbox' %}">Входящие</a></li>
+<li><a href="{% url 'notifications_all' %}">Все уведомления</a></li>
+</ul>
+</aside>
+
+
+<main style="flex-grow: 1;">
+<h1>Уведомления</h1>
+
 
 {% if notifications %}
-<ul>
-  {% for n in notifications %}
-  <li>
-    <strong>{{ n.created_at|date:"d.m.Y H:i" }}</strong> — {{ n.message }}
-  </li>
-  {% endfor %}
+<ul style="list-style: none; padding: 0;">
+{% for n in notifications %}
+<li style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; background: {% if n.is_read %}#e5ffe5{% else %}#fff{% endif %};">
+<a href="{% url 'notification_detail' n.id %}" style="text-decoration:none; color: black;">
+<strong>{{ n.created_at|date:"d.m.Y H:i" }}</strong> — {{ n.message }}
+</a>
+<form method="post" action="{% url 'notification_delete' n.id %}" style="display:inline; float:right;">
+{% csrf_token %}
+<button type="submit">Удалить</button>
+</form>
+</li>
+{% endfor %}
 </ul>
 {% else %}
-<p>Пока нет уведомлений </p>
+<p>Пока нет уведомлений</p>
 {% endif %}
+</main>
+</div>
 {% endblock %}

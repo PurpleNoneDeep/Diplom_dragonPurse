@@ -1,0 +1,19 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+<h1>Уведомление</h1>
+
+
+<p><strong>От:</strong> {{ notification.user.email }}</p>
+<p><strong>Дата:</strong> {{ notification.created_at|date:"d.m.Y H:i" }}</p>
+<p><strong>Текст:</strong><br>{{ notification.message }}</p>
+
+
+{% if not notification.is_read %}
+<form method="post" action="{% url 'notification_mark_read' notification.id %}">
+{% csrf_token %}
+<button type="submit">Отметить как прочитанное</button>
+</form>
+{% endif %}
+
+
+{% endblock %}

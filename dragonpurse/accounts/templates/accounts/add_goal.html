@@ -1,49 +1,166 @@
-
+{% extends "accounts/base.html" %}
+{% load static %}
 
 {% block content %}
-  <h1>Добавить цель</h1>
-
-  {% if messages %}
-    {% for m in messages %}
-      <div class="alert">{{ m }}</div>
-    {% endfor %}
-  {% endif %}
-
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-
-    <div>
-      {{ form.name.label_tag }}<br>
-      {{ form.name }}{{ form.name.errors }}
+<body>
+    <div class="header">
+        <img src="{% static 'images/dragon_head.png' %}" alt="Дракончик" class="dragon">
+        <h1>Добавить цель</h1>
     </div>
 
-    <div>
-      {{ form.description.label_tag }}<br>
-      {{ form.description }}{{ form.description.errors }}
+    <div class="container">
+        {% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-group">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                <div class="error">{{ form.name.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                <div class="error">{{ form.description.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.deadline.label_tag }}
+                {{ form.deadline }}
+                <div class="error">{{ form.deadline.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.status.label_tag }}
+                {{ form.status }}
+                <div class="error">{{ form.status.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.amount.label_tag }}
+                {{ form.amount }}
+                <div class="error">{{ form.amount.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.participants.label_tag }}
+                {{ form.participants }}
+                <small style="color:#639372;">{{ form.participants.help_text }}</small>
+                <div class="error">{{ form.participants.errors }}</div>
+            </div>
+
+            <button type="submit">Добавить цель</button>
+        </form>
+
+        <a href="{% url 'goals_list' %}" class="back">← Назад к списку целей</a>
     </div>
 
-    <div>
-      {{ form.deadline.label_tag }}<br>
-      {{ form.deadline }}{{ form.deadline.errors }}
-    </div>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0f0f0f;
+            color: #639372;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    <div>
-      {{ form.status.label_tag }}<br>
-      {{ form.status }}{{ form.status.errors }}
-    </div>
+        .container {
+            background-color: #131212;
+            border: 2px solid #639372;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(99, 147, 114, 0.2);
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 600px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
 
-    <div>
-      {{ form.amount.label_tag }}<br>
-      {{ form.amount }}{{ form.amount.errors }}
-    </div>
+        h1 {
+            color: #639372;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    <div>
-      {{ form.participants.label_tag }}<br>
-      {{ form.participants }}{{ form.participants.errors }}
-      <small>{{ form.participants.help_text }}</small>
-    </div>
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
 
-    <button type="submit">Добавить цель</button>
-  </form>
+        input, textarea, select {
+            background-color: #0f0f0f;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #8ac8a4;
+            box-shadow: 0 0 6px #639372;
+            outline: none;
+        }
+
+        button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #639372;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .dragon {
+            width: 36px;
+            height: 36px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .error {
+            color: #ff4f4f;
+            font-size: 0.9em;
+        }
+
+    </style>
+</body>
 {% endblock %}

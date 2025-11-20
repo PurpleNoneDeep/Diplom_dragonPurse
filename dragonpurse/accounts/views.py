@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, authenticate, logout
 from django.db.models import Sum
 from django.views import View
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryForm
 from .models import Notification, Category, Transaction
@@ -34,6 +35,180 @@ from django.db import models
 
 from .models import SharedAccessInvite, SharedAccess, Notification, Wishlist
 from .forms import SharedAccessInviteForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from .models import SharedAccess, Goal, Wishlist, UserGoal
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Notification
+from django.contrib.auth.decorators import login_required
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils.dateparse import parse_date
+from .models import Transaction, Category, Analytics
+from django.views.decorators.http import require_POST
+
+@login_required
+@require_POST
+def save_report(request):
+    user = request.user
+
+    start_date = parse_date(request.POST.get("start_date"))
+    end_date = parse_date(request.POST.get("end_date"))
+    selected_category = request.POST.get("category")
+    selected_type = request.POST.get("type")
+
+    # снова собираем queryset
+    transactions = Transaction.objects.filter(user=user)
+
+    if start_date:
+        transactions = transactions.filter(date__date__gte=start_date)
+    if end_date:
+        transactions = transactions.filter(date__date__lte=end_date)
+    if selected_category:
+        transactions = transactions.filter(category__id=selected_category)
+    if selected_type:
+        transactions = transactions.filter(category__category_type=selected_type)
+
+    # вычисляем суммы
+    income_sum = transactions.filter(category__category_type="income").aggregate(total=models.Sum("amount"))["total"] or 0
+    expense_sum = transactions.filter(category__category_type="expense").aggregate(total=models.Sum("amount"))["total"] or 0
+    balance = income_sum - expense_sum
+
+    # создаём запись Analytics
+    Analytics.objects.create(
+        user=user,
+        start_date=start_date,
+        end_date=end_date,
+        income_sum=income_sum,
+        expense_sum=expense_sum,
+        balance=balance
+    )
+
+    return redirect("report_builder")
+@login_required
+def report_builder(request):
+    user = request.user
+
+    # Базовый queryset — только транзакции пользователя
+    transactions = Transaction.objects.filter(user=user).order_by('-date')
+    categories = Category.objects.filter(user=user)
+    filtered = False  # флаг, чтобы показать кнопку "Сохранить"
+    start_date = end_date = selected_category = selected_type = None
+
+    if request.method == "POST" and "compose_report" in request.POST:
+
+        # 1. Получаем значения полей
+        start_date = parse_date(request.POST.get("start_date"))
+        end_date = parse_date(request.POST.get("end_date"))
+        selected_category = request.POST.get("category")
+        selected_type = request.POST.get("type")  # income / expense
+
+        # 2. Фильтруем
+        if start_date:
+            transactions = transactions.filter(date__date__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(date__date__lte=end_date)
+        if selected_category:
+            transactions = transactions.filter(category__id=selected_category)
+        if selected_type:
+            categories = categories.filter(category_type=selected_type)
+
+        filtered = True
+
+        # Сохраняем промежуточные значения в контекст
+    categories = Category.objects.filter(user=user)
+
+    context = {
+        "transactions": transactions,
+        "categories": categories,
+        "filtered": filtered,
+        "start_date": start_date,
+        "end_date": end_date,
+        "selected_category": selected_category,
+        "selected_type": selected_type,
+    }
+
+    return render(request, "accounts/report.html", context)
+
+
+
+@login_required
+def notifications_inbox(request):
+    notifications = Notification.objects.filter(user=request.user)
+    return render(request, "accounts/notifications.html", {"notifications": notifications})
+
+
+
+
+@login_required
+def notifications_all(request):
+    notifications = Notification.objects.all()
+    return render(request, "accounts/notifications.html", {"notifications": notifications})
+
+
+@login_required
+def notification_detail(request, pk):
+    notification = get_object_or_404(Notification, pk=pk)
+    return render(request, "accounts/notification_detail.html", {"notification": notification})
+
+
+@login_required
+def notification_mark_read(request, pk):
+    notification = get_object_or_404(Notification, pk=pk)
+    notification.is_read = True
+    notification.save()
+    return redirect("notifications_inbox")
+
+
+@login_required
+def notification_delete(request, pk):
+    notification = get_object_or_404(Notification, pk=pk)
+    if request.method == "POST":
+        notification.delete()
+    return redirect("notifications_inbox")
+
+
+@login_required
+def shared_users_list(request):
+    """Список пользователей, открывших доступ текущему"""
+    accesses = SharedAccess.objects.filter(shared_with=request.user)
+    return render(request, 'accounts/shared_users.html', {'accesses': accesses})
+
+
+@login_required
+def friend_goals(request, user_id):
+    """Просмотр целей друга"""
+    shared_access = get_object_or_404(
+        SharedAccess,
+        owner_id=user_id,
+        shared_with=request.user,
+        can_view_goals=True
+    )
+    goals = Goal.objects.filter(user_goals__user=shared_access.owner).distinct()
+    return render(request, 'accounts/friend_goals.html', {
+        'friend': shared_access.owner,
+        'goals': goals
+    })
+
+
+@login_required
+def friend_wishlist(request, user_id):
+    """Просмотр вишлиста друга"""
+    shared_access = get_object_or_404(
+        SharedAccess,
+        owner_id=user_id,
+        shared_with=request.user,
+        can_view_wishlist=True
+    )
+    wishlist = Wishlist.objects.filter(user=shared_access.owner)
+    return render(request, 'accounts/friend_wishlist.html', {
+        'friend': shared_access.owner,
+        'wishlist': wishlist
+    })
 
 
 
@@ -400,21 +575,25 @@ class TransactionDeleteView(View):
         transaction.delete()
         return redirect('transaction_list')
 
-class TransactionListView(View):
-    def get(self, request):
-        today = timezone.now()
-        date_filter = request.GET.get('date', today.date())
 
-        transactions = Transaction.objects.filter(
-            user=request.user,
-            date__date=date_filter
-        ).order_by('-date')
+def transaction_list(request):
+    transactions = Transaction.objects.filter(user=request.user).select_related('category')
 
-        return render(request, 'accounts/transaction_list.html', {
-            'transactions': transactions,
-            'selected_date': date_filter,
-            'today': today.date(),
-        })
+    # Формируем JSON для календаря
+    transactions_json = json.dumps([
+        {
+            'date': t.date.strftime('%Y-%m-%d'),
+            'category': t.category.name if t.category else 'Без категории',
+            'amount': float(t.amount),
+            'transaction_type': t.category.category_type if t.category else 'unknown',
+        }
+        for t in transactions
+    ])
+
+    return render(request, 'accounts/transaction_list.html', {
+        'transactions': transactions,
+        'transactions_json': transactions_json,
+    })
 
 class TransactionCreateView(View):
     def get(self, request):

@@ -1,0 +1,31 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+<h1>🎯 Цели пользователя {{ friend.username }}</h1>
+
+{% if goals %}
+<table border="1" cellpadding="8" style="border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Описание</th>
+      <th>Дедлайн</th>
+      <th>Статус</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for goal in goals %}
+    <tr>
+      <td>{{ goal.name }}</td>
+      <td>{{ goal.description }}</td>
+      <td>{{ goal.deadline }}</td>
+      <td>{{ goal.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Нет доступных целей.</p>
+{% endif %}
+
+<a href="{% url 'shared_users_list' %}">⬅ Назад</a>
+{% endblock %}

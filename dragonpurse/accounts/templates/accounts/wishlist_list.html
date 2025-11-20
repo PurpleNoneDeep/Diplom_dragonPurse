@@ -1,7 +1,9 @@
+{% extends "accounts/base.html" %}
 {% block content %}
 <h1>Мой Wishlist</h1>
 
 <a href="{% url 'wishlist_create' %}" class="button" style="margin-bottom:15px; display:inline-block;">Добавить желание</a>
+<a href="{% url 'shared_users_list' %}" class="button">👥 Посмотреть цели друга</a>
 
 {% if wishlists %}
 <table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;">

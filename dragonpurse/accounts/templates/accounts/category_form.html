@@ -1,16 +1,143 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Добавить категорию</title>
-</head>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
 <body>
-    <h1>Добавить категорию</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Добавить категорию</button>
-    </form>
-    <a href="{% url 'category_list' %}">Назад к списку категорий</a>
+    <div class="header">
+        <img src="{% static 'images/dragon_head.png' %}" alt="Дракончик" class="dragon">
+        <h1>Добавить категорию</h1>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                <div class="error">{{ form.name.errors }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form.category_type.label_tag }}
+                {{ form.category_type }}
+                <div class="error">{{ form.category_type.errors }}</div>
+            </div>
+
+            <button type="submit">Добавить категорию</button>
+        </form>
+
+        <a href="{% url 'category_list' %}" class="back">← Назад к списку категорий</a>
+    </div>
+
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0f0f0f;
+            color: #639372;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #131212;
+            border: 2px solid #639372;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(99, 147, 114, 0.2);
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        h1 {
+            color: #639372;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            background-color: #0f0f0f;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #8ac8a4;
+            box-shadow: 0 0 6px #639372;
+            outline: none;
+        }
+
+        button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #639372;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .dragon {
+            width: 36px;
+            height: 36px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .error {
+            color: #ff4f4f;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            font-weight: bold;
+        }
+    </style>
 </body>
-</html>
+{% endblock %}

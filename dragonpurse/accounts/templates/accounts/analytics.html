@@ -3,77 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аналитика транзакций</title>
+    <title>Аналитика — ДракоФин</title>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0f0f0f;
+            color: #639372;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #639372;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: #131212;
+            border: 2px solid #639372;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(99, 147, 114, 0.2);
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 1000px;
+            margin-bottom: 40px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input[type="date"],
+        select {
+            background-color: #0f0f0f;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #8ac8a4;
+            box-shadow: 0 0 6px #639372;
+            outline: none;
+        }
+
+        button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        .chart-container {
+            background-color: #0f0f0f;
+            border: 1px solid #639372;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-top: 30px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            color: #639372;
+        }
+
+        th, td {
+            border: 1px solid #639372;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        tr:hover {
+            background-color: #1f1f1f;
+        }
+
+        .btn-danger {
+            background: none;
+            border: 1px solid #ff4f4f;
+            color: #ff4f4f;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #ff4f4f;
+            color: #131212;
+        }
+
+        .back {
+            text-align: center;
+            margin-top: 20px;
+            color: #639372;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .dragon {
+            width: 36px;
+            height: 36px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
 </head>
 <body>
-<div class="buttons">
-    <a href="{% url 'report' %}"><button id="report-button">Составить отчет</button></a>
-</div>
-<div>
-    <h1>Анализ транзакций</h1>
 
-    <form method="GET">
-        <label for="start_date">С даты:</label>
-        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+    <div class="header">
+        <img src="/static/images/dragon_head.png" alt="Дракончик" class="dragon">
+        <h1>Аналитика транзакций</h1>
+    </div>
 
-        <label for="end_date">По дату:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+    <div class="container">
+        <form method="GET" class="filters">
+            <div>
+                <label for="start_date">С даты:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div>
+                <label for="end_date">По дату:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div>
+                <label for="category">Категория:</label>
+                <select id="category" name="category">
+                    <option value="">Все категории</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id|stringformat:"d" == category_id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Фильтровать</button>
+        </form>
 
-        <label for="category">Категория:</label>
-        <select id="category" name="category">
-            <option value="">--- Все категории ---</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}" {% if category.id|stringformat:"d" == category_id %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-            {% endfor %}
-        </select>
+        {% if error %}
+            <p style="color: red; text-align: center;">{{ error }}</p>
+        {% else %}
+            <div class="chart-container">
+                <img src="data:image/png;base64,{{ plot_url }}" alt="График транзакций" style="max-width:100%; height:auto; border-radius:8px;">
+            </div>
+        {% endif %}
+    </div>
 
-        <button type="submit">Фильтровать</button>
-    </form>
+    <div class="container table-container">
+        <h1>Список транзакций</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>Категория</th>
+                    <th>Описание</th>
+                    <th>Сумма</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.category.get_category_type_display }}</td>
+                        <td>{{ transaction.category.name }}</td>
+                        <td>{{ transaction.description }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>
+                            <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Нет транзакций.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% else %}
-        <img src="data:image/png;base64,{{ plot_url }}" alt="График транзакций">
-    {% endif %}
+    <a href="{% url 'report' %}" class="back">📊 Составить отчет</a>
 
-</div>
-<div>
-    <h1>Транзакции</h1>
-<table>
-    <thead>
-        <tr>
-            <th>Дата</th>
-            <th>Тип</th>
-            <th>Категория</th>
-            <th>Описание</th>
-            <th>Сумма</th>
-            <th>Действия</th> <!-- Новый заголовок для действий -->
-        </tr>
-    </thead>
-    <tbody>
-        {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.date }}</td>
-                <td>{{ transaction.get_transaction_type_display }}</td>
-                <td>{{ transaction.category.name }}</td>
-                <td>{{ transaction.description }}</td>
-                <td>{{ transaction.amount }}</td>
-                <td>
-                    <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Удалить</button>
-                    </form>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6">Нет транзакций.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
 </body>
 </html>

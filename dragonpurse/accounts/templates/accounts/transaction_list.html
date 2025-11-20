@@ -2,72 +2,268 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Список транзакций</title>
+    <title>Календарь транзакций</title>
     <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-    }
-    .Calendar {
-        width: 100%; /* Занимает полную ширину родителя */
-    }
-    .calendar {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-        width: 20%;  /* Задаем ширину календаря 20% */
-        height: 30vh; /* Задаем высоту 20% от высоты окна */
-        margin-top: 20px;
-        border: 1px solid #ccc; /* Добавляем границу для визуализации */
-        overflow: auto; /* Позволяет прокручивать содержимое, если оно выходит за пределы */
-    }
-    .day {
-        padding: 2px;
-        border: 1px solid #ccc;
-        text-align: center;
-        height: 70%; /* Заполняет высоту родителя */
-    }
-    .header {
-        margin-bottom: 20px;
-    }
-    .weekdays {
-        display: contents;
-        font-weight: bold;
-    }
-    .weekdays div {
-        text-align: center;
-    }
-    button {
-        margin-top: 5px;
-    }
-</style>
+        body {
+            background-color: #131212;
+            font-family: Arial, sans-serif;
+            color: #639372;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Боковая панель */
+        .sidebar {
+            background-color: #0e0e0e;
+            width: 220px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border-right: 2px solid #639372;
+        }
+
+        .sidebar h2 {
+            color: #639372;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #639372;
+            width: 100%;
+        }
+
+        .sidebar button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 10px;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .sidebar button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #639372;
+        }
+
+        /* Календарь */
+        .calendar-container {
+            margin-bottom: 30px;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            background-color: #0e0e0e;
+            padding: 10px;
+            width: 60%;
+        }
+
+        .day {
+            position: relative;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            padding: 3px;
+        }
+
+        .day-button {
+            width: 100%;
+            height: 60px;
+            background-color: #131212;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Подсказка */
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 250px;
+            background-color: #131212;
+            border: 1px solid #639372;
+            color: #639372;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 70px;
+            left: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .day:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Подсветка по типу */
+        .income-day .day-button {
+            box-shadow: 0 0 10px 2px #2ecc71;
+        }
+
+        .expense-day .day-button {
+            box-shadow: 0 0 10px 2px #e74c3c;
+        }
+
+        .mixed-day .day-button {
+            box-shadow: 0 0 10px 2px #2ecc71, 0 0 10px 2px #e74c3c;
+            background: linear-gradient(135deg, rgba(46,204,113,0.1), rgba(231,76,60,0.1));
+        }
+
+        /* Селекты и кнопки */
+        select, button {
+            background-color: #131212;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+
+        /* Таблица */
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #639372;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        tr:hover {
+            background-color: #1e1e1e;
+        }
+
+        .btn-danger {
+            background-color: #131212;
+            border: 1px solid #639372;
+            color: #639372;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        .header {
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-    <div class="Calendar">
-        <div>
-            <h1>Фильтр календаря</h1>
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>ДракоФин</h2>
+        <a href="{% url 'dashboard' %}"><button>Главная</button></a>
+        <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
+        <a href="{% url 'planned_expense_create' %}"><button>Запланировать</button></a>
+        <a href="{% url 'report' %}"><button>Отчет</button></a>
+        <a href="{% url 'goals_list' %}"><button>Цели</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Вишлист</button></a>
+        <a href="{% url 'notifications_all' %}"><button>Уведомления</button></a>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+    </div>
+
+    <!-- Основная часть -->
+    <div class="main-content">
+        <h1>Календарь транзакций</h1>
+
+        <div class="calendar-container">
             <div class="header">
                 <select id="year-select"></select>
                 <select id="month-select"></select>
                 <select id="day-select"></select>
                 <button id="apply-button">Применить</button>
             </div>
-            <div>
-                <button id="schedule-transaction-button">Запланировать транзакцию</button>
-                <a href="{% url 'report' %}"><button id="report-button">Составить отчет</button></a>
-                <a href="{% url 'transaction_create' %}">Добавить новую транзакцию</a>
-                <a href="{% url 'category_create' %}">Добавить новую категорию</a>
-                <a href="{% url 'planned_expense_create' %}">Запланировать транзакцию</a>
-            </div>
+
+            <div class="calendar" id="calendar"></div>
         </div>
 
-        <div class="calendar" id="calendar"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>Категория</th>
+                    <th>Описание</th>
+                    <th>Сумма</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.get_transaction_type_display }}</td>
+                        <td>{{ transaction.category.name }}</td>
+                        <td>{{ transaction.description }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>
+                            <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">Нет транзакций.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
         <script>
             const calendarEl = document.getElementById('calendar');
             const yearSelect = document.getElementById('year-select');
             const monthSelect = document.getElementById('month-select');
             const daySelect = document.getElementById('day-select');
             const applyButton = document.getElementById('apply-button');
+
+            const transactions = JSON.parse('{{ transactions_json|escapejs }}');
 
             function populateYearSelect() {
                 const currentYear = new Date().getFullYear();
@@ -105,12 +301,12 @@
             function renderCalendar(year, month) {
                 calendarEl.innerHTML = '';
 
-                // Дни недели
                 const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
                 weekdays.forEach(day => {
                     const dayDiv = document.createElement('div');
-                    dayDiv.className = 'day-weekdays';
                     dayDiv.textContent = day;
+                    dayDiv.style.textAlign = 'center';
+                    dayDiv.style.fontWeight = 'bold';
                     calendarEl.appendChild(dayDiv);
                 });
 
@@ -118,81 +314,65 @@
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
                 for (let i = 0; i < firstDay; i++) {
-                    const emptyDiv = document.createElement('div');
-                    calendarEl.appendChild(emptyDiv);
+                    calendarEl.appendChild(document.createElement('div'));
                 }
 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dayDiv = document.createElement('div');
                     dayDiv.className = 'day';
 
-                    // Создание кнопки
                     const button = document.createElement('button');
                     button.textContent = day;
                     button.className = 'day-button';
-                    button.style.width = '100%';
-                    button.style.height = '100%';
 
-                    // Добавляем обработчик события для кнопки
+                    const dateKey = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    const dayTransactions = transactions.filter(t => t.date === dateKey);
+
+                    // Подсветка по типу транзакций
+                    const hasIncome = dayTransactions.some(t => t.transaction_type === 'income');
+                    const hasExpense = dayTransactions.some(t => t.transaction_type === 'expense');
+
+                    if (hasIncome && hasExpense) {
+                        dayDiv.classList.add('mixed-day');
+                    } else if (hasIncome) {
+                        dayDiv.classList.add('income-day');
+                    } else if (hasExpense) {
+                        dayDiv.classList.add('expense-day');
+                    }
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+
+                    if (dayTransactions.length > 0) {
+                        tooltip.innerHTML = `<strong>${dayTransactions.length} транзакц${dayTransactions.length > 1 ? 'ии' : 'ия'}:</strong><br>` +
+                            dayTransactions.map(t => `${t.transaction_type === 'income' ? 'Доход: ' : 'Расход: '} ${t.category}: ${t.amount} ₽`).join('<br>');
+                    }
+
                     button.addEventListener('click', () => {
-                        const selectedDate = `${year}-${month + 1}-${day}`; // Формат YYYY-MM-DD
-                        window.location.href = `?date=${selectedDate}`; // Переход к фильтрации по дате
+                        const selectedDate = `${year}-${month + 1}-${day}`;
+                        window.location.href = `?date=${selectedDate}`;
                     });
 
-                    // Добавляем кнопку в div дня
                     dayDiv.appendChild(button);
+                    if (dayTransactions.length > 0) {
+                        dayDiv.appendChild(tooltip);
+                    }
                     calendarEl.appendChild(dayDiv);
                 }
             }
-        function updateCalendar() {
-        const year = parseInt(yearSelect.value);
-        const month = parseInt(monthSelect.value);
-        populateDaySelect(year, month);
-        renderCalendar(year, month);
-    }
 
-    applyButton.addEventListener('click', updateCalendar);
+            function updateCalendar() {
+                const year = parseInt(yearSelect.value);
+                const month = parseInt(monthSelect.value);
+                populateDaySelect(year, month);
+                renderCalendar(year, month);
+            }
 
-    // Инициализация
-    populateYearSelect();
-    populateMonthSelect();
-    updateCalendar();
+            applyButton.addEventListener('click', updateCalendar);
+            populateYearSelect();
+            populateMonthSelect();
+            updateCalendar();
         </script>
     </div>
-
-    <table>
-    <thead>
-        <tr>
-            <th>Дата</th>
-            <th>Тип</th>
-            <th>Категория</th>
-            <th>Описание</th>
-            <th>Сумма</th>
-            <th>Действия</th> <!-- Новый заголовок для действий -->
-        </tr>
-    </thead>
-    <tbody>
-        {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.date }}</td>
-                <td>{{ transaction.get_transaction_type_display }}</td>
-                <td>{{ transaction.category.name }}</td>
-                <td>{{ transaction.description }}</td>
-                <td>{{ transaction.amount }}</td>
-                <td>
-                    <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Удалить</button>
-                    </form>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6">Нет транзакций.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 </body>
 </html>

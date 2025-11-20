@@ -1,7 +1,9 @@
-
+{% extends "accounts/base.html" %}
 {% block content %}
 <h1>Мои цели</h1>
 <p><a href="{% url 'add_goal' %}">Добавить новую цель</a></p>
+<a href="{% url 'shared_users_list' %}" class="button">👥 Посмотреть цели друга</a>
+
 {% for g in goals %}
 <div class="card" style="padding:15px; margin-bottom:15px; border:1px solid #ccc; border-radius:10px;">
   <h2>{{ g.name }}</h2>
