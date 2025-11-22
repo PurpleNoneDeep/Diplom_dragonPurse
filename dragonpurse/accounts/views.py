@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, authenticate, logout
 from django.db.models import Sum
+from django.db.models.functions import ExtractYear, ExtractMonth
 from django.views import View
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -577,9 +578,28 @@ class TransactionDeleteView(View):
 
 
 def transaction_list(request):
+    # Получаем параметры
+    selected_year = request.GET.get('year')
+    selected_month = request.GET.get('month')
+    selected_day = request.GET.get('day')
+
     transactions = Transaction.objects.filter(user=request.user).select_related('category')
 
-    # Формируем JSON для календаря
+    # Фильтр по году и месяцу
+    if selected_year and selected_month:
+        transactions = transactions.annotate(
+            year=ExtractYear('date'),
+            month=ExtractMonth('date')
+        ).filter(
+            year=int(selected_year),
+            month=int(selected_month)
+        )
+
+    # Если выбран конкретный день — фильтруем также по дню
+    if selected_day:
+        transactions = transactions.filter(date__day=int(selected_day))
+
+    # JSON для отображения в календаре
     transactions_json = json.dumps([
         {
             'date': t.date.strftime('%Y-%m-%d'),
@@ -593,6 +613,9 @@ def transaction_list(request):
     return render(request, 'accounts/transaction_list.html', {
         'transactions': transactions,
         'transactions_json': transactions_json,
+        'selected_year': selected_year,
+        'selected_month': selected_month,
+        'selected_day': selected_day,
     })
 
 class TransactionCreateView(View):
@@ -734,23 +757,34 @@ class LogoutView(View):
         logout(request)
         return redirect('login')
 
+
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
+        now = timezone.now()
 
-        # Сумма всех доходов
+        # Определение первого и последнего дня текущего месяца
+        first_day_of_month = now.replace(day=1)
+        last_day_of_month = (first_day_of_month + timezone.timedelta(days=31)).replace(day=1) - timezone.timedelta(
+            days=1)
+
+        # Сумма всех доходов за текущий месяц
         income_total = (
                 Transaction.objects.filter(
                     user=user,
-                    category__category_type='income'
+                    category__category_type='income',
+                    date__gte=first_day_of_month,
+                    date__lte=last_day_of_month
                 ).aggregate(total=Sum('amount'))['total'] or 0
         )
 
-        # Сумма всех расходов
+        # Сумма всех расходов за текущий месяц
         expense_total = (
                 Transaction.objects.filter(
                     user=user,
-                    category__category_type='expense'
+                    category__category_type='expense',
+                    date__gte=first_day_of_month,
+                    date__lte=last_day_of_month
                 ).aggregate(total=Sum('amount'))['total'] or 0
         )
 

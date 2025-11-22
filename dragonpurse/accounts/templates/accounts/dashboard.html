@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -125,82 +126,7 @@
         .logout a:hover {
             text-decoration: underline;
         }
-        .dragon {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            animation: headMove 3s ease-in-out infinite;
-        }
 
-        /* Основная форма головы */
-        .dragon-head {
-            width: 60px;
-            height: 50px;
-            background-color: #639372;
-            border-radius: 50% 50% 40% 40%;
-            position: relative;
-            transform: rotate(-10deg);
-        }
-
-        /* Глаз */
-        .eye {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #131212;
-            border-radius: 50%;
-            top: 15px;
-            left: 35px;
-            animation: blink 4s infinite;
-        }
-
-        /* Зрачок (мигает отдельно для реалистичности) */
-        .eye::after {
-            content: "";
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background-color: #fff;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-        }
-
-        /* Рог */
-        .horn {
-            position: absolute;
-            width: 10px;
-            height: 20px;
-            background-color: #93b793;
-            border-radius: 50%;
-            transform: rotate(30deg);
-            top: -10px;
-            left: 10px;
-        }
-
-        .horn.right {
-            left: 35px;
-            transform: rotate(-30deg);
-        }
-
-        /* Анимации */
-        @keyframes blink {
-            0%, 90%, 100% {
-                height: 10px;
-            }
-            95% {
-                height: 2px;
-            }
-        }
-
-        @keyframes headMove {
-            0%, 100% {
-                transform: rotate(-5deg);
-            }
-            50% {
-                transform: rotate(5deg);
-            }
-        }
 
         .welcome-container {
             display: flex;
@@ -217,52 +143,46 @@
 </head>
 
 <body>
-    <!-- ======= ЛЕВАЯ ПАНЕЛЬ ======= -->
+
     <div class="sidebar">
         <h1>ДракоФин</h1>
 
         <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
         <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
         <a href="{% url 'notifications_all' %}"><button>Уведомления</button></a>
         <a href="{% url 'analytics' %}"><button>Аналитика</button></a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
-        <a href="{% url 'wishlist_list' %}"><button>Вишлист</button></a>
-        <a href="{% url 'shared_users_list' %}"><button>Совместный доступ</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
 
         <div class="logout">
             <a href="{% url 'logout' %}">Выйти</a>
         </div>
     </div>
 
-    <!-- ======= ОСНОВНОЙ КОНТЕНТ ======= -->
+
     <main>
         <div class="welcome-container">
         <h1>Добро пожаловать, {{ user.username }}!</h1>
-        <div class="dragon">
-            <div class="dragon-head">
-                <div class="horn"></div>
-                <div class="horn right"></div>
-                <div class="eye"></div>
-            </div>
+            <img src="{% static 'accounts/img/happy_dragon.png' %}" width="200" height="300" alt="Счастливый дракончик">
         </div>
-    </div>
 
-        <!-- Верхняя панель — Баланс, Доходы, Расходы -->
         <div class="dashboard">
             <a href="/" class="card">
-                <h2>Баланс (на дату)</h2>
-                <p>{{ balance|floatformat:2 }} ₽</p>
+                <h2>Баланс</h2>
+                <p>{{ balance|floatformat:2 }} BYN</p>
             </a>
             <a href="/" class="card">
                 <h2>Доходы</h2>
-                <p>{{ income_total|floatformat:2 }} ₽</p>
+                <p>{{ income_total|floatformat:2 }} BYN</p>
             </a>
             <a href="/" class="card">
                 <h2>Расходы</h2>
-                <p>{{ expense_total|floatformat:2 }} ₽</p>
+                <p>{{ expense_total|floatformat:2 }} BYN</p>
             </a>
+
         </div>
+
 
         <!-- Нижний блок — Аналитика -->
         <div class="analytics">

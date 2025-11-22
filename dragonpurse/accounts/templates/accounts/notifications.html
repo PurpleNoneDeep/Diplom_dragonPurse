@@ -1,12 +1,21 @@
 {% extends "accounts/base.html" %}
 {% block content %}
+ <div class="sidebar">
+        <h1>ДракоФин</h1>
+
+        <a href="{% url 'notifications_inbox' %}"><button>Входящие</button></a>
+        <a href="{% url 'notifications_all' %}"><button>Все уведомления</button></a>
+        <a href="{% url 'goals_list' %}"><button>Цели</button></a>
+        <a href="{% url 'shared_users_list' %}"><button>Посмотреть цели друга</button></a>
+        <a href="{% url 'shared_users_list' %}"><button>Совместный доступ</button></a>
+
+        <div class="logout">
+            <a href="{% url 'logout' %}">Выйти</a>
+        </div>
+    </div>
+
 <div class="notifications-container" style="display: flex; gap: 20px;">
-<aside style="width: 200px;">
-<ul>
-<li><a href="{% url 'notifications_inbox' %}">Входящие</a></li>
-<li><a href="{% url 'notifications_all' %}">Все уведомления</a></li>
-</ul>
-</aside>
+
 
 
 <main style="flex-grow: 1;">
