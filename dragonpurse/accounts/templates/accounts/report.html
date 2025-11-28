@@ -39,7 +39,7 @@
     <table>
         <thead>
             <tr>
-                <th>Дата</th><th>Тип</th><th>Категория</th><th>Описание</th><th>Сумма</th><th>Действия</th>
+                <th>Дата</th><th>Тип</th><th>Категория</th><th>Описание</th><th>Сумма</th>
             </tr>
         </thead>
         <tbody>
@@ -50,12 +50,6 @@
                     <td>{{ transaction.category.name }}</td>
                     <td>{{ transaction.description }}</td>
                     <td>{{ transaction.amount }}</td>
-                    <td>
-                        <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Удалить</button>
-                        </form>
-                    </td>
                 </tr>
             {% empty %}
                 <tr><td colspan="6">Нет транзакций.</td></tr>
@@ -64,7 +58,7 @@
     </table>
 
     <!-- Форма сохранения — показываем только если был запрос фильтра (is_filtered) -->
-        {{% if filtered %}
+        {% if filtered %}
         <form method="post" action="{% url 'save_report' %}">
             {% csrf_token %}
             <input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">

@@ -1,10 +1,14 @@
 {% extends "accounts/base.html" %}
 {% block content %}
-<body>
+<div class="container">
     <h1>Настройки пользователя</h1>
     <p>Здесь вы можете изменить ваши настройки.</p>
-    <a href="{% url 'shared_account' %}">Поделиться аккаунтом</a>
-    <a href="{% url 'logout' %}">Выйти</a>
-    <a href="{% url 'profile' %}">Назад к профилю</a>
-</body>
+    <div>
+        <a href="{% url 'shared_account' %}"><button>Настроить интерфейс</button></a>
+        <a href="{% url 'profile' %}"><button>Настроить профиль</button></a>
+        <a href="{% url 'shared_account' %}"><button>Настроить совместный доступ</button></a>
+        <a href="{% url 'dashboard' %}"><button>Вернуться</button></a>
+    </div>
+
+</div>
 {% endblock %}

@@ -155,9 +155,8 @@
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <a href="{% url 'settings' %}"><button>Настройки</button></a>
 
-        <div class="logout">
             <a href="{% url 'logout' %}">Выйти</a>
-        </div>
+
     </div>
 
 
@@ -168,7 +167,7 @@
         </div>
 
         <div class="dashboard">
-            <a href="/" class="card">
+            <a href="{% url 'report_builder' %}" class="card">
                 <h2>Баланс</h2>
                 <p>{{ balance|floatformat:2 }} BYN</p>
             </a>

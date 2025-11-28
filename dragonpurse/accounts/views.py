@@ -45,12 +45,38 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Notification
 from django.contrib.auth.decorators import login_required
 
-
+from .forms import SettingsForm
+from .models import Settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
 from .models import Transaction, Category, Analytics
 from django.views.decorators.http import require_POST
+
+def settings_view(request):
+    if request.method == 'POST':
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            selected_color = form.cleaned_data['theme_color']
+            # Сохраняем в БД
+            Settings.objects.update_or_create(
+                user=request.user,
+                key='theme_color',
+                defaults={'value': selected_color}
+            )
+            return redirect('settings')  # Перенаправление на ту же страницу или другую после сохранения
+    else:
+        form = SettingsForm()
+
+    # Получаем текущие настройки
+    current_color = Settings.objects.filter(user=request.user, key='theme_color').first()
+    current_color_value = current_color.value if current_color else ''
+
+    return render(request, 'accounts/settings.html', {'form': form, 'current_color': current_color_value})
+
+def index(request):
+    user = request.user
+    return render(request, "accounts/index.html", context={'user': request.user})
 
 @login_required
 @require_POST

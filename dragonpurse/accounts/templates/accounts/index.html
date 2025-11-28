@@ -1,0 +1,25 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/index.css' %}">{% endblock %}
+
+{% block content %}
+<main>
+{% if user.is_authenticated %}
+<h1>Добро пожаловать в DragonPurse, {{ user.username }}</h1>
+<a href="{% url 'dashboard' %}"><button>Перейти в личный кабинет</button></a>
+
+{% else %}
+<h1>Добро пожаловать в приложение для учета финансов DragonPurse!</h1>
+<a href="{% url 'register' %}"><button>Войти в аккаунт</button></a>
+{%endif %}
+
+<div class="container">
+    <div class="item">Управляй своими финансами с легкостью!</div>
+    <div class="item">Следи за расходами: Удобно фиксируй каждую покупку и контролируй свои траты.</div>
+    <div class="item">Планируй бюджет: Создавай бюджеты на разные категории и оптимизируй свои финансы.</div>
+    <div class="item">Анализируй доходы и расходы: Понимай, куда уходят твои деньги, и принимай обоснованные решения.</div>
+    <div class="item">Легкий и интуитивно понятный интерфейс! Начни экономить уже сегодня!</div>
+</div>
+</main>
+{% endblock %}

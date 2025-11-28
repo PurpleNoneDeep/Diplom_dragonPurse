@@ -1,0 +1,23 @@
+main{
+justify-content: center; /* Центрирование элементов по горизонтали */
+    flex-wrap: wrap;
+}
+.container {
+
+            display: flex;
+            justify-content: space-around; /* Расположение контейнеров с равными промежутками */
+            flex-wrap: wrap; /* Поддержка переносов на мобильных устройствах */
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #639372; /* Обводка контейнера */
+            border-radius: 5px; /* Скругление углов */
+        }
+        .item {
+            padding: 15px;
+            margin: 10px;
+            border: 1px solid #639372; /* Обводка для каждого контейнера */
+            border-radius: 3px; /* Скругление углов */
+            width: 200px; /* Фиксированная ширина для контейнеров */
+            text-align: center; /* Выравнивание текста по центру */
+            box-shadow: 0 0 6px #639372; /* Тень для эффекта глубины */
+        }

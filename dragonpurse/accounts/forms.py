@@ -10,6 +10,16 @@ from django.core.exceptions import ValidationError
 from .models import Goal, Wishlist
 from .models import SharedAccessInvite
 
+class SettingsForm(forms.Form):
+    theme_color = forms.ChoiceField(
+        choices=[
+            ('light', 'Светлая тема'),
+            ('dark', 'Темная тема'),
+            ('purple', 'Синяя тема'),
+        ],
+        label='Выберите цвет интерфейса'
+    )
+
 class SharedAccessInviteForm(forms.ModelForm):
     receiver_email = forms.EmailField(label="Email получателя")
 

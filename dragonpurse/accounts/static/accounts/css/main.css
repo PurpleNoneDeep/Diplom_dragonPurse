@@ -1,0 +1,162 @@
+ body {
+            font-family: "Inter", sans-serif;
+            background-color: #0f0f0f;
+            color: #639372;
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: #639372;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        h1, h2, h3 {
+            color: #639372;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Хедер */
+        header {
+            background-color: #131212;
+            border-bottom: 2px solid #639372;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+        }
+
+        header .dragon {
+            width: 36px;
+            height: 36px;
+            margin-right: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Кнопки */
+        button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Формы */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input, select, textarea {
+            background-color: #0f0f0f;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #8ac8a4;
+            box-shadow: 0 0 6px #639372;
+            outline: none;
+        }
+
+        /* Таблицы */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 2px solid #639372;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        tr:hover {
+            background-color: #131212;
+        }
+
+        /* Карточки и дашборд */
+        .card {
+            background-color: #131212;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .card:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Сообщения */
+        .alert {
+            background-color: #222;
+            border: 1px solid #639372;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Общие блоки */
+        .flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 10px;
+            color: #639372;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }

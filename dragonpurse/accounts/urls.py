@@ -5,16 +5,16 @@ from .views import LoginView, LogoutView, DashboardView, RegisterView, ProfileVi
     wishlist_create, wishlist_edit, wishlist_delete, planned_expense_list, planned_expense_create, planned_expense_edit, \
     planned_expense_delete, notifications_list, shared_account_view, invites_list, handle_invite, friend_wishlist, \
     shared_users_list, friend_goals, notification_delete, notification_mark_read, notification_detail, \
-    notifications_all, notifications_inbox, report_builder, save_report
+    notifications_all, notifications_inbox, report_builder, save_report, index, settings_view
 
 urlpatterns = [
-    path('', DashboardView.as_view(), name='index'),
+    path('', index, name='index'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('register/', RegisterView.as_view(), name='register'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('settings/', SettingsView.as_view(), name='settings'),
+    path('settings/', settings_view, name='settings'),
     path('shared-account/', SharedAccountView.as_view(), name='shared_account'),
     path('notifications/', notifications_inbox, name='notifications_inbox'),
     path('notifications/all/', notifications_all, name='notifications_all'),
