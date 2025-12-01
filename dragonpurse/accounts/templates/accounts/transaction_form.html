@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Создание транзакции — ДракоФин</title>
+    <title>Добавление транзакции</title>
     <style>
         body {
             font-family: "Inter", sans-serif;
@@ -42,6 +43,7 @@
 
         input[type="number"],
         input[type="date"],
+        input[type="text"],
         select,
         textarea {
             background-color: #0f0f0f;
@@ -141,87 +143,151 @@
 </head>
 <body>
     <div class="header">
-        <img src="/static/images/dragon_head.png" alt="Дракончик" class="dragon">
-        <h1>Создание транзакции</h1>
+        <img src="{% static 'accounts/img/happy_dragon_head.png' %}" alt="Дракончик" class="dragon">
+        <h1>Добавление транзакции </h1>
     </div>
 
     <div class="container">
-        <form method="post">
-            {% csrf_token %}
+    <form method="post" onsubmit="return validateForm()">
+    {% csrf_token %}
 
-            <label for="amount">Сумма:</label>
-            <input type="number" name="amount" id="amount" required step="0.01" />
+    <label for="amount">Сумма:</label>
+    <input type="number" name="amount" id="amount" required step="0.01" min="0" />
 
-            <label for="category_type">Тип транзакции:</label>
-            <select name="category_type" id="category_type" onchange="updateCategories()">
-                <option value="">Выберите тип</option>
-                <option value="income">Доход</option>
-                <option value="expense">Расход</option>
-            </select>
+    <label for="category_type">Тип транзакции:</label>
+    <select name="category_type" id="category_type" onchange="updateCategories()">
+        <option value="">Выберите тип</option>
+        <option value="income">Доход</option>
+        <option value="expense">Расход</option>
+    </select>
 
-            <label for="category">Категория:</label>
-            <select name="category" id="category">
-                <option value="">Сначала выберите тип</option>
-            </select>
+    <label for="category">Категория:</label>
+    <select name="category" id="category" onchange="toggleNewCategoryField()">
+        <option value="">Сначала выберите тип</option>
+        {% for category in categories_income %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+        {% for category in categories_expense %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+        <option value="new">Новая категория</option>
+    </select>
 
-            <label >Описание:</label>
-            {{ form.description }}
-
-            <label for="newdate">Дата:</label>
-            <input type="date" name="newdate" id="newdate" value="{{ current_date }}" />
-
-            <!-- Блок цели: появляется только при доходе -->
-            <div id="goal-fields" class="goal-fields">
-                <label for="goal">Цель (если хотите отчислить часть дохода):</label>
-                <select name="goal" id="goal">
-                    <option value="">— не выбрано —</option>
-                    {% for goal in goals %}
-                        <option value="{{ goal.id }}">{{ goal.name }}</option>
-                    {% endfor %}
-                </select>
-
-                <label for="goal_amount">Сумма для цели:</label>
-                <input type="number" step="0.01" name="goal_amount" id="goal_amount" placeholder="Например, 5000">
-            </div>
-
-            <button type="submit">Добавить транзакцию</button>
-        </form>
-
-        <a class="back-link" href="{% url 'transaction_list' %}">Назад к списку транзакций</a>
+    <div id="new-category-field" >
+        <label for="new_category">Введите новую категорию:</label>
+        <input type="text" name="new_category" id="new_category" required>
     </div>
 
-    <script>
-        const categoriesIncome = {{ categories_income|safe }};
-        const categoriesExpense = {{ categories_expense|safe }};
-        const goalFields = document.getElementById('goal-fields');
+    <label>Описание:</label>
+    {{ form.description }}
 
-        function updateCategories() {
-            const typeSelect = document.getElementById('category_type');
-            const categorySelect = document.getElementById('category');
-            categorySelect.innerHTML = '';
+    <label for="newdate">Дата:</label>
+    <input type="date" name="newdate" id="newdate" value="{{ current_date }}" />
 
-            const selectedType = typeSelect.value;
-            let categories = [];
+    <div id="goal-fields" class="goal-fields">
+        <label for="goal">Цель (если хотите отчислить часть дохода):</label>
+        <select name="goal" id="goal">
+            <option value="">— не выбрано —</option>
+            {% for goal in goals %}
+                <option value="{{ goal.id }}">{{ goal.name }}</option>
+            {% endfor %}
+        </select>
 
-            // Появление блока целей только для доходов
-            if (selectedType === 'income') {
-                goalFields.style.display = 'block';
-                categories = categoriesIncome;
-            } else if (selectedType === 'expense') {
-                goalFields.style.display = 'none';
-                categories = categoriesExpense;
-            } else {
-                goalFields.style.display = 'none';
-            }
+        <label for="goal_amount">Сумма для цели:</label>
+        <input type="number" step="0.01" name="goal_amount" id="goal_amount" placeholder="Например, 5000" min="0">
+    </div>
 
-            // Заполняем категории
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = category.name;
-                categorySelect.appendChild(option);
-            });
-        }
+    <button type="submit">Добавить транзакцию</button>
+</form>
+    </div>
+
+<script>
+// Функция для валидации формы перед отправкой
+function validateForm() {
+    // Получаем значение суммы транзакции и преобразуем его в число
+    const amount = parseFloat(document.getElementById('amount').value);
+    // Получаем значение суммы цели или устанавливаем 0, если поле пустое
+    const goalAmount = parseFloat(document.getElementById('goal_amount').value) || 0;
+    // Получаем текст введённой новой категории
+    const newCategoryInput = document.getElementById('new_category').value;
+
+    // Проверяем, не превышает ли сумма цели сумму транзакции
+    if (goalAmount > amount) {
+        alert('Сумма для цели не может превышать сумму дохода.'); // Сообщение об ошибке
+        return false; // Отменяем отправку формы
+    }
+
+    // Проверяем, выбрана ли новая категория и введено ли имя новой категории
+    if (document.getElementById('category').value === 'new' && newCategoryInput.trim() === '') {
+        alert('Введите название новой категории.'); // Сообщение об ошибке
+        return false; // Отменяем отправку формы
+    }
+
+    return true; // Позволяем отправку формы
+}
+
+// Функция для переключения видимости поля ввода новой категории
+function toggleNewCategoryField() {
+    // Получаем выпадающий список с категориями
+    const categorySelect = document.getElementById('category');
+    // Получаем элемент поля ввода для новой категории
+    const newCategoryField = document.getElementById('new-category-field');
+
+    // Проверяем, выбрана ли "Новая категория"
+    if (categorySelect.value === 'new') {
+        newCategoryField.style.display = 'block'; // Показываем поле ввода
+    } else {
+        newCategoryField.style.display = 'none'; // Скрываем поле ввода
+    }
+}
+
+// Получаем список категорий доходов, переданный из шаблона
+const categoriesIncome = {{ categories_income|safe }};
+// Получаем список категорий расходов, переданный из шаблона
+const categoriesExpense = {{ categories_expense|safe }};
+// Получаем элемент блока для целей
+const goalFields = document.getElementById('goal-fields');
+
+// Функция для обновления списка категорий в зависимости от выбранного типа транзакции
+function updateCategories() {
+    // Получаем элемент выпадающего списка типа транзакции
+    const typeSelect = document.getElementById('category_type');
+    // Получаем элемент выпадающего списка категорий
+    const categorySelect = document.getElementById('category');
+    categorySelect.innerHTML = ''; // Очищаем предыдущие опции категорий
+
+    // Получаем выбранный тип транзакции
+    const selectedType = typeSelect.value;
+    let categories = []; // Массив для хранения соответствующих категорий
+
+    // Устанавливаем видимость блока целей только для доходов
+    if (selectedType === 'income') {
+        goalFields.style.display = 'block'; // Показываем блок целей
+        categories = categoriesIncome; // Заполняем массив категориями доходов
+    } else if (selectedType === 'expense') {
+        goalFields.style.display = 'none'; // Скрываем блок целей
+        categories = categoriesExpense; // Заполняем массив категориями расходов
+    } else {
+        goalFields.style.display = 'none'; // Скрываем блок для неопределенных типов
+    }
+
+    const newCategoryOption = document.createElement('option');
+newCategoryOption.value = 'new'; // Устанавливаем значение для новой категории
+newCategoryOption.textContent = 'Новая категория'; // Устанавливаем текст для новой категории
+categorySelect.appendChild(newCategoryOption); // Добавляем опцию для новой категории в выпадающий список
+
+// Теперь добавляем остальные категории
+categories.forEach(category => {
+    // Создаем новый элемент option для каждой категории
+    const option = document.createElement('option');
+    option.value = category.id; // Устанавливаем значение option
+    option.textContent = category.name; // Устанавливаем текст option
+    categorySelect.appendChild(option); // Добавляем option в выпадающий список
+});
+
+// После обновления категорий вызываем функцию для проверки новой категории
+toggleNewCategoryField(); // Проверяем, нужно ли показывать поле для новой категории
+}
     </script>
 </body>
 </html>

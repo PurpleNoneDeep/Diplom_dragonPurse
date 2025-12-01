@@ -665,6 +665,7 @@ class TransactionCreateView(View):
 
     def post(self, request):
         category_id = request.POST.get('category')
+        new_category_name = request.POST.get('new_category')
         description = request.POST.get('description')
         amount = request.POST.get('amount')
         goal_id = request.POST.get('goal')
@@ -676,29 +677,49 @@ class TransactionCreateView(View):
         else:
             date_num = timezone.now()
 
+        # Определение типа категории
+        if category_id == 'new':
+            category_type = request.POST.get('category_type')
+            if category_type not in ['income', 'expense']:
+                messages.error(request, 'Некорректный тип категории.')
+                return redirect('transaction_list')
+            category = Category.objects.create(
+                user=request.user,
+                name=new_category_name,
+                category_type=category_type
+            )
+            category_id = category.id  # Используйте ID только что созданной категории
+
+        # Далее сохраняем транзакцию
+        amount_decimal = Decimal(amount)
+        goal_amount_decimal = Decimal(goal_amount) if goal_amount else None
+
+        if goal_amount_decimal is not None and (goal_amount_decimal <= 0 or goal_amount_decimal > amount_decimal):
+            messages.error(request, 'Сумма для цели должна быть положительной и не превышать сумму дохода.')
+            return redirect('transaction_list')
+
         transaction = Transaction(
             user=request.user,
             category_id=category_id,
             description=description,
-            amount=Decimal(amount),
+            amount=amount_decimal,
             date=date_num,
             goal_id=goal_id if goal_id else None,
-            goal_amount=Decimal(goal_amount) if goal_amount else None,
+            goal_amount=goal_amount_decimal if goal_amount_decimal else None,
         )
         transaction.save()
 
-        if transaction.category and transaction.category.category_type == 'income' and goal_id and goal_amount:
+        if transaction.category and transaction.category.category_type == 'income' and goal_id and goal_amount_decimal:
             user_goal = UserGoal.objects.filter(user=request.user, goal_id=goal_id).first()
             if user_goal:
-                user_goal.saved = getattr(user_goal, 'saved', Decimal('0.00')) + Decimal(goal_amount)
+                user_goal.saved += goal_amount_decimal
                 user_goal.save()
             else:
-                # Если почему-то записи нет — создаём новую
                 UserGoal.objects.create(
                     user=request.user,
                     goal_id=goal_id,
                     amount=Decimal('0.00'),
-                    saved=Decimal(goal_amount)
+                    saved=goal_amount_decimal
                 )
 
         messages.success(request, 'Транзакция успешно добавлена.')
