@@ -116,6 +116,8 @@ def save_report(request):
     )
 
     return redirect("report_builder")
+
+
 @login_required
 def report_builder(request):
     user = request.user
@@ -123,7 +125,7 @@ def report_builder(request):
     # Базовый queryset — только транзакции пользователя
     transactions = Transaction.objects.filter(user=user).order_by('-date')
     categories = Category.objects.filter(user=user)
-    filtered = False  # флаг, чтобы показать кнопку "Сохранить"
+    filtered = False  # Флаг, чтобы показать кнопку "Сохранить"
     start_date = end_date = selected_category = selected_type = None
 
     if request.method == "POST" and "compose_report" in request.POST:
@@ -146,9 +148,58 @@ def report_builder(request):
 
         filtered = True
 
-        # Сохраняем промежуточные значения в контекст
-    categories = Category.objects.filter(user=user)
+        # Подготовка данных для графика
+        dates = []
+        amounts = []
+        for transaction in transactions:
+            if isinstance(transaction.date, datetime.date):
+                dates.append(transaction.date)
+            if isinstance(transaction.amount, (int, Decimal)):
+                amounts.append(float(transaction.amount))
 
+        # Проверка наличия данных для графика
+        if not dates or not amounts:
+            return render(request, "accounts/report.html", {
+                "error": "Нет доступных данных для построения графика.",
+                "categories": categories,
+                "filtered": filtered,
+                "start_date": start_date,
+                "end_date": end_date,
+                "selected_category": selected_category,
+                "selected_type": selected_type,
+                "transactions": transactions,
+            })
+
+        # Создание графика
+        plt.figure()
+        plt.plot(dates, amounts, marker='o')
+        plt.title('Транзакции')
+        plt.xlabel('Дата')
+        plt.ylabel('Сумма')
+        plt.xticks(rotation=90)
+
+        # Сохранение графика в буфер
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close()
+
+        # Добавляем график и данные в контекст
+        context = {
+            "transactions": transactions,
+            "categories": categories,
+            "filtered": filtered,
+            "start_date": start_date,
+            "end_date": end_date,
+            "selected_category": selected_category,
+            "selected_type": selected_type,
+            "plot_url": image_base64,  # График в формате base64
+        }
+
+        return render(request, "accounts/report.html", context)
+
+    # Сохраняем промежуточные значения в контекст
     context = {
         "transactions": transactions,
         "categories": categories,

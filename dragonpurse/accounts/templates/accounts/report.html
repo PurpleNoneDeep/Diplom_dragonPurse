@@ -36,6 +36,12 @@
     </form>
 
     <!-- Таблица результатов -->
+    {% if plot_url %}
+    <div>
+        <h2>Ваш отчет</h2>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="График транзакций" />
+    </div>
+{% endif %}
     <table>
         <thead>
             <tr>
