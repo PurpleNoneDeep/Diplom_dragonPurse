@@ -237,15 +237,18 @@
                 {% for transaction in transactions %}
                     <tr>
                         <td>{{ transaction.date }}</td>
-                        <td>{{ transaction.get_transaction_type_display }}</td>
+                        <td>{{ transaction.category.category_type }}</td>
                         <td>{{ transaction.category.name }}</td>
                         <td>{{ transaction.description }}</td>
                         <td>{{ transaction.amount }}</td>
                         <td>
+                            <a href="{% url 'transaction_edit' transaction.id %}"><button class="btn-danger">Изменить</button></a>
                             <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
                                 {% csrf_token %}
+
                                 <button type="submit" class="btn-danger">Удалить</button>
                             </form>
+
                         </td>
                     </tr>
                 {% empty %}

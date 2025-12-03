@@ -1,0 +1,12 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+<body>
+    <h1>Изменить транзакцию</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить изменения</button>
+    </form>
+    <a href="{% url 'transaction_list' %}">Назад</a>
+</body>
+{% endblock %}

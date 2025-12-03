@@ -53,6 +53,20 @@ from django.utils.dateparse import parse_date
 from .models import Transaction, Category, Analytics
 from django.views.decorators.http import require_POST
 
+
+def transaction_edit(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id)
+
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            return redirect('transaction_list')  # Перенаправление на детальный просмотр
+    else:
+        form = TransactionForm(instance=transaction)
+
+    return render(request, 'accounts/transaction_edit.html', {'form': form})
+
 def settings_view(request):
     if request.method == 'POST':
         form = SettingsForm(request.POST)
