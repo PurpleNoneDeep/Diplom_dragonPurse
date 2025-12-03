@@ -1,0 +1,181 @@
+main{
+display: flex;
+}
+
+        /* Боковая панель */
+        .sidebar {
+            background-color: #0e0e0e;
+            width: 220px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border-right: 2px solid #639372;
+        }
+
+        .sidebar h2 {
+            color: #639372;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #639372;
+            width: 100%;
+        }
+
+        .sidebar button {
+            background-color: #131212;
+            color: #639372;
+            border: 2px solid #639372;
+            border-radius: 10px;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .sidebar button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #639372;
+        }
+
+        /* Календарь */
+        .calendar-container {
+            margin-bottom: 30px;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            border: 2px solid #639372;
+            border-radius: 8px;
+            background-color: #0e0e0e;
+            padding: 10px;
+            width: 60%;
+        }
+
+        .day {
+            position: relative;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            padding: 3px;
+        }
+
+        .day-button {
+            width: 100%;
+            height: 60px;
+            background-color: #131212;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-button:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        /* Подсказка */
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 250px;
+            background-color: #131212;
+            border: 1px solid #639372;
+            color: #639372;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 70px;
+            left: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .day:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Подсветка по типу */
+        .income-day .day-button {
+            box-shadow: 0 0 10px 2px #2ecc71;
+        }
+
+        .expense-day .day-button {
+            box-shadow: 0 0 10px 2px #e74c3c;
+        }
+
+        .mixed-day .day-button {
+            box-shadow: 0 0 10px 2px #2ecc71, 0 0 10px 2px #e74c3c;
+            background: linear-gradient(135deg, rgba(46,204,113,0.1), rgba(231,76,60,0.1));
+        }
+
+        /* Селекты и кнопки */
+        select, button {
+            background-color: #131212;
+            color: #639372;
+            border: 1px solid #639372;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+
+        /* Таблица */
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #639372;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        tr:hover {
+            background-color: #1e1e1e;
+        }
+
+        .btn-danger {
+            background-color: #131212;
+            border: 1px solid #639372;
+            color: #639372;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #639372;
+            color: #131212;
+        }
+
+        .header {
+            margin-bottom: 15px;
+        }

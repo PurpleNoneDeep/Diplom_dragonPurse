@@ -880,33 +880,66 @@ class DashboardView(LoginRequiredMixin, View):
         last_day_of_month = (first_day_of_month + timezone.timedelta(days=31)).replace(day=1) - timezone.timedelta(
             days=1)
 
-        # Сумма всех доходов за текущий месяц
-        income_total = (
-                Transaction.objects.filter(
-                    user=user,
-                    category__category_type='income',
-                    date__gte=first_day_of_month,
-                    date__lte=last_day_of_month
-                ).aggregate(total=Sum('amount'))['total'] or 0
-        )
+        # Получаем транзакции за текущий месяц
+        transactions = Transaction.objects.filter(
+            user=user,
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month
+        ).order_by('date')
 
-        # Сумма всех расходов за текущий месяц
-        expense_total = (
-                Transaction.objects.filter(
-                    user=user,
-                    category__category_type='expense',
-                    date__gte=first_day_of_month,
-                    date__lte=last_day_of_month
-                ).aggregate(total=Sum('amount'))['total'] or 0
-        )
-
-        # Баланс = доходы - расходы
+        # Сумма всех доходов и расходов
+        income_total = transactions.filter(category__category_type='income').aggregate(total=Sum('amount'))[
+                           'total'] or 0
+        expense_total = transactions.filter(category__category_type='expense').aggregate(total=Sum('amount'))[
+                            'total'] or 0
         balance = income_total - expense_total
+
+        # Генерация данных для графика
+        all_days = [first_day_of_month + timezone.timedelta(days=i) for i in
+                    range((last_day_of_month - first_day_of_month).days + 1)]
+        amounts = [0] * len(all_days)
+
+        for transaction in transactions:
+            index = (transaction.date - first_day_of_month).days
+            amounts[index] += transaction.amount
+
+        # Определяем цвета для столбцов
+        colors = ['#639372' if t.category.category_type == 'income' else '#DC143C' for t in transactions]
+        bar_colors = ['#639372' if amounts[i] > 0 and transactions[i].category.category_type == 'income' else '#DC143C'
+                      for i in range(len(amounts))]
+
+        # Создаем график
+        plt.figure(figsize=(10, 6))
+        plt.bar([day.strftime('%Y-%m-%d') for day in all_days], amounts, color=bar_colors, alpha=0.7)
+
+        # Настройка фона
+        plt.gca().set_facecolor('#131212')
+        plt.grid(False)  # Убираем сетку
+
+        # Убираем заголовок
+        plt.title('')  # Убираем заголовок
+        plt.xlabel('Дата', color='#639372')
+        plt.ylabel('Сумма', color='#639372')
+
+        # Устанавливаем метки оси X и Y
+        plt.xticks(rotation=45, ha='right', color='#639372')
+        plt.yticks(color='#639372')
+
+        # Сохраняем график в буфер
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight', facecolor='#131212')
+        plt.close()
+        buf.seek(0)
+        image_png = buf.getvalue()
+        buf.close()
+        graphic = base64.b64encode(image_png)
+        graphic = graphic.decode('utf-8')
 
         context = {
             'balance': balance,
             'income_total': income_total,
             'expense_total': expense_total,
+            'graphic': graphic,
         }
         return render(request, 'accounts/dashboard.html', context)
 
