@@ -306,6 +306,8 @@ def friend_wishlist(request, user_id):
 
 @login_required
 def shared_account_view(request):
+    shared_accesses = SharedAccess.objects.filter(owner=request.user)  # Получаем текущих пользователей с доступом
+
     if request.method == 'POST':
         form = SharedAccessInviteForm(request.POST)
         if form.is_valid():
@@ -315,19 +317,20 @@ def shared_account_view(request):
             # Проверим, не было ли уже приглашения
             existing = SharedAccessInvite.objects.filter(
                 sender=request.user,
-                receiver=receiver,
+                receiver__email=receiver,
                 status='pending'
             ).exists()
             if existing:
                 messages.warning(request, "Приглашение этому пользователю уже отправлено и ожидает ответа.")
             else:
-                SharedAccessInvite.objects.create(
+                # Создаем новое приглашение
+                invite = SharedAccessInvite.objects.create(
                     sender=request.user,
-                    receiver=receiver,
+                    receiver=User.objects.get(email=receiver), # Предполагается, что User имеет email
                     message=message_text
                 )
                 Notification.objects.create(
-                    user=receiver,
+                    user=invite.receiver,
                     message=f"🔔 {request.user.username} пригласил(а) вас к совместному доступу к данным."
                 )
                 messages.success(request, "Приглашение успешно отправлено!")
@@ -335,7 +338,10 @@ def shared_account_view(request):
     else:
         form = SharedAccessInviteForm()
 
-    return render(request, 'accounts/shared_account.html', {'form': form})
+    return render(request, 'accounts/shared_account.html', {
+        'form': form,
+        'shared_accesses': shared_accesses  # Передаем список пользователей с доступом
+    })
 
 
 @login_required
@@ -642,10 +648,25 @@ class ReportView(View):
         transactions = Transaction.objects.filter(user=request.user)
         return render(request, 'accounts/report.html', {'transactions': transactions})
 
+def category_delete(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    category.delete()
+    messages.success(request, "Категория успешно удалена.")
+    return redirect('category_list')  # Перенаправление на список категорий
+
 class CategoryListView(View):
     def get(self, request):
-        categories = Category.objects.filter(user=request.user)  # Получаем категории текущего пользователя
-        return render(request, 'accounts/category_list.html', {'categories': categories})
+        # Получение значения типа категории из GET-запроса
+        category_type = request.GET.get('category_type')
+
+        # Фильтрация категорий по типу, если задано
+        if category_type:
+            categories = Category.objects.filter(user=request.user, category_type=category_type)
+        else:
+            categories = Category.objects.filter(user=request.user)  # Получаем все категории текущего пользователя
+
+        return render(request, 'accounts/category_list.html', {'categories': categories, 'category_type': category_type})
+
 
 class CategoryCreateView(View):
     def get(self, request):
@@ -655,10 +676,16 @@ class CategoryCreateView(View):
     def post(self, request):
         form = CategoryForm(request.POST)
         if form.is_valid():
-            category = form.save(commit=False)
-            category.user = request.user
-            category.save()
-            return redirect('category_list')
+            category_name = form.cleaned_data['name']
+            if Category.objects.filter(name=category_name).exists():
+                messages.error(request, "Категория с таким названием уже существует.")
+            else:
+                category = form.save(commit=False)
+                category.user = request.user
+                category.save()
+                messages.success(request, "Категория успешно добавлена.")
+                return redirect('category_list')
+
         return render(request, 'accounts/category_form.html', {'form': form})
 
 class TransactionDeleteView(View):

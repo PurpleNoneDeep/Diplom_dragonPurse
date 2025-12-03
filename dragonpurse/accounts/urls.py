@@ -5,7 +5,8 @@ from .views import LoginView, LogoutView, DashboardView, RegisterView, ProfileVi
     wishlist_create, wishlist_edit, wishlist_delete, planned_expense_list, planned_expense_create, planned_expense_edit, \
     planned_expense_delete, notifications_list, shared_account_view, invites_list, handle_invite, friend_wishlist, \
     shared_users_list, friend_goals, notification_delete, notification_mark_read, notification_detail, \
-    notifications_all, notifications_inbox, report_builder, save_report, index, settings_view, transaction_edit
+    notifications_all, notifications_inbox, report_builder, save_report, index, settings_view, transaction_edit, \
+    category_delete
 
 urlpatterns = [
     path('', index, name='index'),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('transaction/edit/<int:transaction_id>/', transaction_edit, name='transaction_edit'),
     path('categories/new/', CategoryCreateView.as_view(), name='category_create'),
     path('categories/', CategoryListView.as_view(), name='category_list'),
+    path('category/delete/<int:category_id>/', category_delete, name='category_delete'),
     path('analytics/', AnalyticsView.as_view(), name='analytics'),
     path("report/", report_builder, name="report_builder"),
     path("report/save/", save_report, name="save_report"),

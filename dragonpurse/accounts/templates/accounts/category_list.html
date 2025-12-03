@@ -1,32 +1,45 @@
 {% extends "accounts/base.html" %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Список категорий</title>
-</head>
-<body>
-    <h1>Список категорий</h1>
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/header.css' %}">{% endblock %}
+{% block content %}
+    <a href="{% url 'category_create' %}"><button>Добавить новую категорию</button></a>
+
+    <h1>Ваши категории</h1>
+<form method="get" action="{% url 'category_list' %}">
+    <label for="category_type">Фильтровать по типу:</label>
+    <select name="category_type" id="category_type">
+        <option value="">Все</option>
+        <option value="income" {% if category_type == 'income' %}selected{% endif %}>Доход</option>
+        <option value="expense" {% if category_type == 'expense' %}selected{% endif %}>Расход</option>
+    </select>
+    <button type="submit">Применить фильтр</button>
+</form>
     <table>
-        <thead>
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>Действия</th> <!-- Заголовок для действий -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
             <tr>
-                <th>Название</th>
-                <th>Тип</th>
+                <td>{{ category.name }}</td>
+                <td>{{ category.get_category_type_display }}</td>
+                <td>
+                    <form action="{% url 'category_delete' category.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger">Удалить</button>
+                    </form>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for category in categories %}
-                <tr>
-                    <td>{{ category.name }}</td>
-                    <td>{{ category.get_category_type_display }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="2">Нет категорий.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'category_create' %}">Добавить новую категорию</a>
-</body>
-</html>
+        {% empty %}
+            <tr>
+                <td colspan="3">Нет категорий.</td> <!-- Обновляем количество колонок -->
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -2,6 +2,34 @@
 {% block content %}
 <body>
 <h1>Совместный доступ</h1>
+<div class="container">
+    <h1>Пользователи с доступом к вашему аккаунту</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Доступ к целям</th>
+                <th>Доступ к списку желаемого</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for access in shared_with_users %}
+                <tr>
+                    <td>{{ access.shared_with.username }}</td>
+                    <td>{{ access.can_view_goals|yesno:"Да,Нет" }}</td>
+                    <td>{{ access.can_view_wishlist|yesno:"Да,Нет" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Нет пользователей с доступом.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
 {% if messages %}
   {% for message in messages %}
     <p style="color:green;">{{ message }}</p>
