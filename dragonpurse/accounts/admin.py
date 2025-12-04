@@ -3,6 +3,7 @@ from .models import Notification, Category, Transaction
 from django.contrib import admin
 from .models import Settings, Analytics, Dragon, Wishlist, PlannedExpense, Goal, UserGoal
 
+
 @admin.register(Settings)
 class SettingsAdmin(admin.ModelAdmin):
     list_display = ('user', 'key', 'value')

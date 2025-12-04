@@ -491,19 +491,19 @@ def goal_delete(request, goal_id):
 def goal_detail(request, goal_id):
     goal = get_object_or_404(Goal, id=goal_id)
 
-    # Все участники этой цели
     participants = UserGoal.objects.filter(goal=goal).select_related('user')
-
-    # Общие суммы
     total_goal_amount = sum((p.amount for p in participants), Decimal('0'))
     total_saved = sum((p.saved for p in participants), Decimal('0'))
 
-    # Рассчёт общего процента выполнения
     percent = 0
     if total_goal_amount > 0:
         percent = (total_saved / total_goal_amount * 100).quantize(Decimal('0.01'))
 
-    # Все транзакции, относящиеся к этой цели
+    # Проверка и обновление статуса
+    if total_saved >= total_goal_amount:
+        goal.status = 'completed'
+        goal.save()
+
     transactions = Transaction.objects.filter(goal=goal).select_related('user', 'category').order_by('-date')
 
     return render(request, 'accounts/goal_detail.html', {

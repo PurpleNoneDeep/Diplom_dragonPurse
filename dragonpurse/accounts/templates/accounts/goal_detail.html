@@ -1,5 +1,8 @@
 {% extends "accounts/base.html" %}
 {% block content %}
+<div style="margin-top:20px;">
+  <a href="{% url 'goals_list' %}" class="button"><button>Назад к целям</button></a>
+</div>
 <h1>{{ goal.name }}</h1>
 
 <p><strong>Описание:</strong> {{ goal.description }}</p>
@@ -28,7 +31,7 @@
     {% for p in participants %}
     <tr>
       <td>{{ p.user.username }} ({{ p.user.email }})</td>
-      <td>{{ p.amount|floatformat:2 }} ₽</td>
+      <td>{{ p.amount|floatformat:2 }} BYN</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -58,7 +61,7 @@
     Без категории
 {% endif %}</td>
       <td>{{ t.description }}</td>
-      <td>{{ t.amount|floatformat:2 }} ₽</td>
+      <td>{{ t.amount|floatformat:2 }} BYN</td>
     </tr>
     {% empty %}
     <tr>
@@ -68,7 +71,5 @@
   </tbody>
 </table>
 
-<div style="margin-top:20px;">
-  <a href="{% url 'goals_list' %}" class="button">Назад к целям</a>
-</div>
+
 {% endblock %}
