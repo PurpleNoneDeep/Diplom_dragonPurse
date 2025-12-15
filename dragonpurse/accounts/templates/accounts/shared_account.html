@@ -58,15 +58,26 @@
     </table>
 </div>
 <h2>Пользователи, которые дали вам доступ</h2>
+<table>
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Доступ к целям</th>
+                <th>Доступ к списку желаемого</th>
 
+            </tr>
+        </thead>
+        <tbody>
 {% for access in received_accesses %}
-    <p>
-        {{ access.owner.username }} —
-        цели: {{ access.can_view_goals|yesno:"Да,Нет" }},
-        желания: {{ access.can_view_wishlist|yesno:"Да,Нет" }}
-    </p>
+    <tr>
+        <td>{{ access.owner.username }}</td>
+        <td>{{ access.can_view_goals|yesno:"Да,Нет" }}</td>
+        <td>{{ access.can_view_wishlist|yesno:"Да,Нет" }}</td>
+    </tr>
 {% empty %}
-    <p>Нет полученных доступов.</p>
+    <tr>
+    <td colspan="3">Нет полученных доступов.</td>
+        </tr>
 {% endfor %}
 
 

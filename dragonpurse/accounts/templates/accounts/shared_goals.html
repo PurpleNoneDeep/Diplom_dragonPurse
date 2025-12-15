@@ -1,0 +1,48 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% block title %}Цели друзей{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+        <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
+        <a href="{% url 'add_goal' %}"><button>Добавить цель</button></a>
+        <a href="{% url 'goals_list' %}"><button>Вернуться</button></a>
+        <div class="line"></div>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
+<div class="container">
+    <h1>Цели пользователей, предоставивших доступ</h1>
+
+    {% if shared_goals %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Цель</th>
+                    <th>Накоплено</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_goal in shared_goals %}
+                    <tr>
+                        <td>{{ user_goal.user.username }}</td>
+                        <td>{{ user_goal.goal.name }}</td>
+                        <td>{{ user_goal.saved }}</td>
+                        <td>
+                            {{ user_goal.amount }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Нет целей, доступных для просмотра.</p>
+    {% endif %}
+</div>
+</main>
+{% endblock %}

@@ -5,7 +5,8 @@ from .views import IndexView, DashboardView, LoginView, LogoutView, TransactionL
     WishlistDeleteView, WishlistEditView, ReportBuilderView, build_transactions_chart, DownloadChartView, \
     PlannedExpenseListView, PlannedExpenseCreateView, PlannedExpenseDeleteView, PlannedExpenseEditView, \
     NotificationMarkReadView, NotificationDeleteView, SharedAccountView, settings_view, \
-    ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView, NotificationDetailView
+    ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView, NotificationDetailView, SharedGoalsView, \
+    SharedWishlistView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -38,9 +39,12 @@ urlpatterns = [
     path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification_detail'),
     path('notifications/<int:pk>/delete/', NotificationDeleteView.as_view(), name='notification_delete'),
     path('shared-account/', SharedAccountView.as_view(), name='shared_account'),
+    path('shared-goals/', SharedGoalsView.as_view(), name='shared_goals'),
+    path('shared-wishlist/', SharedWishlistView.as_view(), name='shared_wishlist'),
     path('settings/', settings_view, name='settings'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path("profile/change-name/", ChangeNameView.as_view(), name="change_name"),
     path("profile/change-email/", ChangeEmailView.as_view(), name="change_email"),
     path("profile/change-password/", ChangePasswordView.as_view(), name="change_password"),
+
 ]

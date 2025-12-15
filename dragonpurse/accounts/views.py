@@ -1104,3 +1104,63 @@ class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
     template_name = "accounts/change_password.html"
     success_url = reverse_lazy("profile")
 
+class SharedGoalsView(LoginRequiredMixin, View):
+    def get(self, request):
+        # 1. Все доступы к целям для текущего пользователя
+        accesses = (
+            SharedAccess.objects
+            .filter(
+                shared_with=request.user,
+                can_view_goals=True
+            )
+            .select_related('owner')
+        )
+
+        # 2. Все user_id владельцев, которые дали доступ
+        owners = [access.owner for access in accesses]
+
+        # 3. Цели этих пользователей
+        shared_goals = (
+            UserGoal.objects
+            .filter(user__in=owners)
+            .select_related('user', 'goal')
+        )
+
+        return render(
+            request,
+            'accounts/shared_goals.html',
+            {
+                'shared_goals': shared_goals
+            }
+        )
+
+class SharedWishlistView(LoginRequiredMixin, View):
+    def get(self, request):
+        # 1. Все пользователи, которые дали текущему пользователю доступ к вишлисту
+        accesses = (
+            SharedAccess.objects
+            .filter(
+                shared_with=request.user,
+                can_view_wishlist=True
+            )
+            .select_related('owner')
+        )
+
+        # 2. Владельцы вишлистов
+        owners = [access.owner for access in accesses]
+
+        # 3. Желания этих пользователей
+        shared_wishlists = (
+            Wishlist.objects
+            .filter(user__in=owners)
+            .select_related('user')
+        )
+
+        return render(
+            request,
+            'accounts/shared_wishlist.html',
+            {
+                'shared_wishlists': shared_wishlists
+            }
+        )
+

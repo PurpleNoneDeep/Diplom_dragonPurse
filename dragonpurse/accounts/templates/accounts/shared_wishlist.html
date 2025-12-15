@@ -1,0 +1,45 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% block title %}Цели друзей{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+        <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
+        <a href="{% url 'wishlist_list' %}"><button>Вернуться</button></a>
+        <div class="line"></div>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
+<div class="container">
+    <h1>Желания пользователей, предоставивших доступ</h1>
+
+    {% if shared_wishlists %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Желание</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wish in shared_wishlists %}
+                    <tr>
+                        <td>{{ wish.user.username }}</td>
+                        <td>{{ wish.name }}</td>
+                        <td>
+                            {{ wish.description|default:"—" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Нет желаний, доступных для просмотра.</p>
+    {% endif %}
+</div>
+  </main>
+{% endblock %}
