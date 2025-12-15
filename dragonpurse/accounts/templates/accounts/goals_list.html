@@ -3,13 +3,11 @@
 {% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-        <h1>DragonPurse</h1>
-
-        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
         <a href="{% url 'add_goal' %}"><button>Добавить цель</button></a>
         <a href="{% url 'add_goal' %}"><button>Цели друзей</button></a>
-        <a href="{% url 'dashboard' %}"><button>На главную</button></a>
         <div class="line"></div>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
         <a href="{% url 'logout' %}"><button>Выйти</button></a>
 
     </div>
@@ -34,7 +32,7 @@
       </div>
   </div>
 
-  <a href="{% url 'goal_detail' g.id %}" class="btn btn-primary">Посмотреть детали</a>
+  <a href="{% url 'goal_detail' g.id %}" class="btn btn-primary"><button>Посмотреть детали</button></a>
   <button onclick="confirmDelete({{ g.id }})" class="btn btn-danger">Удалить</button>
 
   <form id="deleteForm{{ g.id }}" method="post" action="{% url 'goal_delete' g.id %}" style="display:none;">

@@ -18,13 +18,11 @@
 <main>
 <h1>Уведомление</h1>
 
-<p><strong>От:</strong> {{ notification.user.email }}</p>
+<p><strong>От:</strong> {{ invite.sender.email }}</p>
 <p><strong>Дата:</strong> {{ notification.created_at|date:"d.m.Y H:i" }}</p>
 <p><strong>Текст:</strong><br>{{ notification.message }}</p>
-    <p>{{ notification.notification_type }}</p>
 
 {% if notification.notification_type == "planned" %}
-<hr>
 <div class="planned-actions">
     <form method="post" action="{% url 'planned_edit' notification.id %}">
         {% csrf_token %}
@@ -37,20 +35,25 @@
     </form>
 </div>
 {% endif %}
-{% if notification.notification_type == "shared_acccess" %}
-<hr>
+{% if notification.notification_type == "shared_access" %}
 <div class="planned-actions">
-    <form method="post" action="{% url 'planned_edit' notification.id %}">
+    <form method="post">
         {% csrf_token %}
-        <button type="submit">Добавить как транзакцию</button>
-    </form>
+        {{ form.as_p }}
 
-    <form method="post" action="{% url 'planned_edit' notification.id %}">
-        {% csrf_token %}
-        <button type="submit">Отложить</button>
+        <!-- скрытые данные для поиска invite -->
+        <input type="hidden" name="sender_email" value="{{ invite.sender.email }}">
+
+        <button type="submit" name="action" value="accept">
+            Подтвердить и дать доступы
+        </button>
+        <button type="submit" name="action" value="decline">
+            Отклонить
+        </button>
     </form>
 </div>
 {% endif %}
+
 
 {% if not notification.is_read %}
 <form method="post" action="{% url 'planned_edit' notification.id %}">

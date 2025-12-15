@@ -150,20 +150,15 @@ class RegisterForm(forms.ModelForm):
 class SharedAccountForm(forms.Form):
     email = forms.EmailField(label='Email пользователя', required=True)
     access_data = forms.MultipleChoiceField(
-        label='Выберите доступные данные',
+        label='Чем вы хотите поделиться?',
         choices=[
-            ('profile', 'Профиль пользователя'),
-            ('settings', 'Настройки'),
-            ('dashboard', 'Личный кабинет'),
+            ('goals', 'Цели'),
+            ('wishlist', 'Список желаний'),
         ],
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
 
-from django import forms
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 
 class ChangeNameForm(forms.ModelForm):

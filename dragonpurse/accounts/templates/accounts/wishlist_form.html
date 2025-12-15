@@ -2,8 +2,11 @@
 {% load static %}
 {% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
-<h2>{{ title }}</h2>
 <form method="post">
+  <div class="header">
+
+        <h1><img src="{% static 'accounts/img/happy_dragon_head.png' %}" alt="Дракончик" class="dragon"> Добавить желание</h1>
+    </div>
   {% csrf_token %}
   {{ form.as_p }}
   <button type="submit" class="button">Сохранить</button>

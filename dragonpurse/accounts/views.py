@@ -59,7 +59,7 @@ from .forms import SettingsForm
 from .models import Settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.utils.dateparse import parse_date
+from django.utils.dateparse import parse_date, parse_datetime
 from .models import Transaction, Category, Analytics
 from django.views.decorators.http import require_POST
 User = get_user_model()
@@ -91,7 +91,8 @@ class IndexView(LoginRequiredMixin, View):
                     Notification.objects.create(
                         user=request.user,
                         message=f"Напоминание: запланирована транзакция '{expense.name}'!",
-                        notification_type="planned"
+                        notification_type="planned",
+                        created_at = current_date
                     )
 
         return render(
@@ -169,9 +170,6 @@ class DashboardView(LoginRequiredMixin, View):
 
         plt.xticks(rotation=45, ha='right', color='#639372')
         plt.yticks(color='#639372')
-
-
-
         plt.legend()
 
         buf = io.BytesIO()
@@ -901,10 +899,96 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
         notification.save()
         return redirect("notifications_inbox")
 
-@login_required
-def notification_detail(request, pk):
-    notification = get_object_or_404(Notification, pk=pk)
-    return render(request, "accounts/notification_detail.html", {"notification": notification})
+
+class NotificationDetailView(View):
+    def get(self, request, pk):
+        notification = get_object_or_404(Notification, pk=pk)
+        invite = get_object_or_404(SharedAccessInvite)
+        form = SharedAccountForm(initial={'email': invite.sender.email})
+        return render(request, "accounts/notification_detail.html", {"notification": notification, "form":form, "invite":invite})
+
+    def post(self, request, pk):
+        action = request.POST.get('action')
+
+        sender_email = request.POST.get('sender_email')
+
+        invite = get_object_or_404(
+            SharedAccessInvite,
+            sender__email=sender_email,
+            receiver=request.user
+        )
+        action = request.POST.get('action')
+
+        # ---------- ОТКЛОНЕНИЕ ----------
+        if action == 'decline':
+            invite.status = 'declined'
+            invite.save()
+
+            messages.info(request, "Доступ отклонён.")
+            return redirect('notifications_inbox')
+
+        # ---------- ПРИНЯТИЕ ----------
+        if action == 'accept':
+            form = SharedAccountForm(request.POST)
+
+            if not form.is_valid():
+                notification = get_object_or_404(Notification, pk=pk)
+                return render(
+                    request,
+                    "accounts/notification_detail.html",
+                    {
+                        "notification": notification,
+                        "form": form
+                    }
+                )
+
+            # ===== 1. ДАННЫЕ ОТ ПОЛЬЗОВАТЕЛЯ B =====
+            access_data_b = form.cleaned_data['access_data']
+
+            can_b_goals = 'goals' in access_data_b
+            can_b_wishlist = 'wishlist' in access_data_b
+
+            user_a = invite.sender     # тот, кто первым открыл доступ
+            user_b = invite.receiver   # тот, кто сейчас нажал кнопку
+
+            # ===== 2. ДАННЫЕ ОТ ПОЛЬЗОВАТЕЛЯ A =====
+            access_data_a = []
+
+            if invite.message:
+                access_data_a = [
+                    item.strip() for item in invite.message.split(',')
+                ]
+
+            can_a_goals = 'goals' in access_data_a
+            can_a_wishlist = 'wishlist' in access_data_a
+
+            # ===== 3. СОЗДАЁМ ДОСТУП A → B =====
+            SharedAccess.objects.update_or_create(
+                owner=user_a,
+                shared_with=user_b,
+                defaults={
+                    'can_view_goals': can_a_goals,
+                    'can_view_wishlist': can_a_wishlist
+                }
+            )
+
+            # ===== 4. СОЗДАЁМ ДОСТУП B → A =====
+            SharedAccess.objects.update_or_create(
+                owner=user_b,
+                shared_with=user_a,
+                defaults={
+                    'can_view_goals': can_b_goals,
+                    'can_view_wishlist': can_b_wishlist
+                }
+            )
+
+            # ===== 5. ОБНОВЛЯЕМ СТАТУС ПРИГЛАШЕНИЯ =====
+            invite.status = 'accepted'
+            invite.save()
+
+            messages.success(request, "Взаимный доступ успешно настроен.")
+            return redirect('notifications_inbox')
+
 
 class NotificationDeleteView(LoginRequiredMixin, View):
     template_name = 'accounts/notification_confirm_delete.html'
@@ -919,10 +1003,27 @@ class NotificationDeleteView(LoginRequiredMixin, View):
         messages.success(request, "Планируемая транзакция удалена.")
         return redirect('notifications_inbox')
 
+
 class SharedAccountView(View):
     def get(self, request):
         form = SharedAccountForm()
-        return render(request, 'accounts/shared_account.html', {'form': form})
+
+        # Все пользователи, которым ТЕКУЩИЙ пользователь дал доступ
+        shared_with_users = SharedAccess.objects.filter(
+            owner=request.user
+        ).select_related('shared_with')
+        received_accesses = SharedAccess.objects.filter(
+            shared_with=request.user
+        ).select_related('owner')
+        return render(
+            request,
+            'accounts/shared_account.html',
+            {
+                'form': form,
+                'shared_with_users': shared_with_users, "received_accesses":received_accesses
+            }
+        )
+
 
     def post(self, request):
         form = SharedAccountForm(request.POST)
@@ -938,12 +1039,25 @@ class SharedAccountView(View):
                 return render(request, 'accounts/shared_account.html', {'form': form})
 
             # Создание уведомления для указанного пользователя
-            message = f'Вам предоставлен доступ к: {", ".join(access_data)}.'
-            type="shared_acccess"
-            notification = Notification(user=recipient_user, message=message, notification_type=type)
+            message = f'Вам предоставлен доступ к: {", ".join(access_data)}.\n'
+            notification_type = "shared_access"
+            now = timezone.localtime()
+            current_date = now.date()
+
+            # Сохраните уведомление
+            notification = Notification(user=recipient_user, message=message, notification_type=notification_type, created_at=current_date)
             notification.save()
 
-            messages.success(request, 'Уведомление отправлено!')
+            # Сохраните данные в SharedAccessInvite
+            invInvite = SharedAccessInvite(
+                sender=request.user,
+                receiver=recipient_user,
+                message=message,
+                status='pending'
+            )
+            invInvite.save()
+
+            messages.success(request, 'Уведомление отправлено и приглашение создано!')
             return redirect('shared_account')
         else:
             messages.error(request, 'Ошибка в форме. Пожалуйста, исправьте и повторите попытку.')

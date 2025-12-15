@@ -4,8 +4,8 @@ from .views import IndexView, DashboardView, LoginView, LogoutView, TransactionL
     GoalDetailView, GoalsListView, GoalDeleteView, RegisterView, WishlistListView, WishlistCreateView, \
     WishlistDeleteView, WishlistEditView, ReportBuilderView, build_transactions_chart, DownloadChartView, \
     PlannedExpenseListView, PlannedExpenseCreateView, PlannedExpenseDeleteView, PlannedExpenseEditView, \
-    NotificationMarkReadView, notification_detail, NotificationDeleteView, SharedAccountView, settings_view, \
-    ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView
+    NotificationMarkReadView, NotificationDeleteView, SharedAccountView, settings_view, \
+    ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView, NotificationDetailView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -35,7 +35,7 @@ urlpatterns = [
     path('planned/<int:pk>/delete/', PlannedExpenseDeleteView.as_view(), name='planned_expense_delete'),
     path('planned/edit/<int:planned_id>/', PlannedExpenseEditView.as_view(), name='planned_edit'),
     path('notifications/', NotificationMarkReadView.as_view(), name='notifications_inbox'),
-    path('notifications/<int:pk>/', notification_detail, name='notification_detail'),
+    path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification_detail'),
     path('notifications/<int:pk>/delete/', NotificationDeleteView.as_view(), name='notification_delete'),
     path('shared-account/', SharedAccountView.as_view(), name='shared_account'),
     path('settings/', settings_view, name='settings'),

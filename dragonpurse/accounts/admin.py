@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, Category, Transaction
+from .models import Notification, Category, Transaction, SharedAccess, SharedAccessInvite
 from django.contrib import admin
 from .models import Settings, Analytics, Dragon, Wishlist, PlannedExpense, Goal, UserGoal
 
@@ -55,3 +55,14 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'category', 'description')  # Поля, которые будут отображаться в списке
     list_filter = ('date', 'user', 'category')  # Фильтры по полям
     search_fields = ('description',)  # Поля для поиска
+
+@admin.register(SharedAccess)
+class SharedAccessAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'shared_with', 'can_view_goals', 'can_view_wishlist', 'created_at')
+    search_fields = ('owner__username', 'shared_with__username')
+
+
+@admin.register(SharedAccessInvite)
+class SharedAccessInviteAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'receiver', 'status', 'created_at')
+    search_fields = ('sender__username', 'receiver__username', 'status')

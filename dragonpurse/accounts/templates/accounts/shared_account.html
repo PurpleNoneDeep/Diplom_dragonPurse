@@ -3,20 +3,33 @@
 {% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-        <h1>DragonPurse</h1>
+        <h1><a href="{% url 'transaction_list' %}">DragonPurse</a></h1>
 
-        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
-        <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Мои приглашения</button></a>
         <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
-        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
         <div class="line"></div>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
         <a href="{% url 'logout' %}"><button>Выйти</button></a>
 </div>
 <main>
 <h1>Совместный доступ</h1>
+
+<div class="card">
+
+{% if messages %}
+  {% for message in messages %}
+    <p style="color:green;">{{ message }}</p>
+  {% endfor %}
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Отправить приглашение</button>
+</form>
+</div>
 <div class="container">
     <h1>Пользователи с доступом к вашему аккаунту</h1>
 
@@ -26,6 +39,7 @@
                 <th>Пользователь</th>
                 <th>Доступ к целям</th>
                 <th>Доступ к списку желаемого</th>
+
             </tr>
         </thead>
         <tbody>
@@ -43,24 +57,19 @@
         </tbody>
     </table>
 </div>
+<h2>Пользователи, которые дали вам доступ</h2>
+
+{% for access in received_accesses %}
+    <p>
+        {{ access.owner.username }} —
+        цели: {{ access.can_view_goals|yesno:"Да,Нет" }},
+        желания: {{ access.can_view_wishlist|yesno:"Да,Нет" }}
+    </p>
+{% empty %}
+    <p>Нет полученных доступов.</p>
+{% endfor %}
 
 
-{% if messages %}
-  {% for message in messages %}
-    <p style="color:green;">{{ message }}</p>
-  {% endfor %}
-{% endif %}
-
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Отправить приглашение</button>
-</form>
-
-<hr>
-
-<p><a href="{% url 'notifications_inbox' %}">Мои приглашения</a></p>
-<p><a href="{% url 'dashboard' %}">Вернуться</a></p>
 </main>
 {% endblock %}
 
