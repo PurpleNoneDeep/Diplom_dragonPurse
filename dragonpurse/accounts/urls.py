@@ -6,7 +6,7 @@ from .views import IndexView, DashboardView, LoginView, LogoutView, TransactionL
     PlannedExpenseListView, PlannedExpenseCreateView, PlannedExpenseDeleteView, PlannedExpenseEditView, \
     NotificationMarkReadView, NotificationDeleteView, SharedAccountView, settings_view, \
     ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView, NotificationDetailView, SharedGoalsView, \
-    SharedWishlistView
+    SharedWishlistView, SettingsView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -46,5 +46,6 @@ urlpatterns = [
     path("profile/change-name/", ChangeNameView.as_view(), name="change_name"),
     path("profile/change-email/", ChangeEmailView.as_view(), name="change_email"),
     path("profile/change-password/", ChangePasswordView.as_view(), name="change_password"),
+    path('settings/interface', SettingsView.as_view(), name='settings_interface'),
 
 ]

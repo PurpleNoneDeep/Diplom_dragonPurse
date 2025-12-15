@@ -1,6 +1,7 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
         <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>

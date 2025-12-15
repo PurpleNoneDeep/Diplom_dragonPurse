@@ -169,3 +169,18 @@ class ChangeEmailForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["email"]
+
+class BackgroundColorForm(forms.Form):
+    COLOR_CHOICES = [
+        ('#ffffff', 'Белый'),
+        ('#0f0f0f', 'Стандартный'),
+        ('#e3f2fd', 'Голубой'),
+        ('#131212', 'Темный'),
+        ('#fff3e0', 'Оранжевый'),
+        ('#fce4ec', 'Розовый'),
+    ]
+
+    background_color = forms.ChoiceField(
+        label='Цвет фона',
+        choices=COLOR_CHOICES
+    )

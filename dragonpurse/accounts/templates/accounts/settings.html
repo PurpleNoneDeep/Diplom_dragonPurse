@@ -1,12 +1,13 @@
 {% extends "accounts/base.html" %}
 {% load static %}
 {% block title %}Настройки{% endblock %}
-{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
   <h1>DragonPurse</h1>
     <div>
-        <a href="{% url 'shared_account' %}"><button>Настроить интерфейс</button></a>
+        <a href="{% url 'settings_interface' %}"><button>Настроить интерфейс</button></a>
         <a href="{% url 'profile' %}"><button>Настроить профиль</button></a>
         <a href="{% url 'shared_account' %}"><button>Настроить совместный доступ</button></a>
         <a href="{% url 'dashboard' %}"><button>Вернуться</button></a>

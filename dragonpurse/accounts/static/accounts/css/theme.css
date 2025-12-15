@@ -1,0 +1,14 @@
+:root {
+    --background-color: #131212
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+.container {
+    background: #131212;
+}
+.sidebar {
+            background-color: var(--background-color);
+        }

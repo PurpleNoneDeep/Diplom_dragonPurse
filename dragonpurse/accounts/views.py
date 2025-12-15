@@ -15,7 +15,8 @@ from django.views.generic import FormView, UpdateView
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryForm, ChangeNameForm, ChangeEmailForm
+from .forms import SharedAccountForm, RegisterForm, TransactionForm, CategoryForm, ChangeNameForm, ChangeEmailForm, \
+    BackgroundColorForm
 from .models import Notification, Category, Transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -1161,6 +1162,53 @@ class SharedWishlistView(LoginRequiredMixin, View):
             'accounts/shared_wishlist.html',
             {
                 'shared_wishlists': shared_wishlists
+            }
+        )
+class SettingsView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        # Пытаемся получить сохранённый цвет
+        setting = Settings.objects.filter(
+            user=request.user,
+            key='background_color'
+        ).first()
+
+        initial_color = setting.value if setting else '#ffffff'
+
+        form = BackgroundColorForm(
+            initial={'background_color': initial_color}
+        )
+
+        return render(
+            request,
+            'accounts/interface_settings.html',
+            {
+                'form': form,
+                'background_color': initial_color
+            }
+        )
+
+    def post(self, request):
+        form = BackgroundColorForm(request.POST)
+
+        if form.is_valid():
+            color = form.cleaned_data['background_color']
+
+            # Сохраняем или обновляем настройку
+            Settings.objects.update_or_create(
+                user=request.user,
+                key='background_color',
+                defaults={'value': color}
+            )
+
+            return redirect('settings_interface')
+
+        return render(
+            request,
+            'accounts/interface_settings.html',
+            {
+                'form': form,
+                'background_color': '#ffffff'
             }
         )
 
