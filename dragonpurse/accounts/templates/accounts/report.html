@@ -1,9 +1,28 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
+<div class="sidebar">
+      <h1>DragonPurse</h1>
+        <a href="{% url 'dashboard' %}"><button>Главная</button></a>
+        <a href="{% url 'category_list' %}"><button>Категории</button></a>
+        <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
+        <a href="{% url 'transaction_list' %}"><button>Запланированные транзакции</button></a>
+        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
+        <a href="{% url 'goals_list' %}"><button>Цели</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
+        <a href="{% url 'transaction_list' %}"><button>Уведомления</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+    </div>
+<main>
 <div class="container">
-    <h1>Составление отчета</h1>
-    <a href="{% url 'dashboard' %}"><button>Вернуться</button></a>
+    <div class="welcome-container">
 
+    <img class="animated-dragon2" src="{% static 'accounts/img/report_dragon.png' %}" width="100" height="150" alt="Счастливый дракончик">
+    <h1>Составление отчета</h1>
+    </div>
     <form method="POST">
         {% csrf_token %}
         <div class="form-group">
@@ -15,6 +34,14 @@
             <input type="date" id="end_date" name="end_date" required value="{{ end_date|date:'Y-m-d' }}">
         </div>
         <div class="form-group">
+            <label for="type">Тип:</label>
+            <select id="type" name="type">
+                <option value="">-- Выберите тип --</option>
+                <option value="income" {% if selected_type == 'income' %}selected{% endif %}>Доходы</option>
+                <option value="expenses" {% if selected_type == 'expenses' %}selected{% endif %}>Расходы</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="category">Категория:</label>
             <select id="category" name="category">
                 <option value="">-- Выберите категорию --</option>
@@ -23,21 +50,14 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="form-group">
-            <label for="type">Тип:</label>
-            <select id="type" name="type">
-                <option value="">-- Выберите тип --</option>
-                <option value="income" {% if selected_type == 'income' %}selected{% endif %}>Доходы</option>
-                <option value="expenses" {% if selected_type == 'expenses' %}selected{% endif %}>Расходы</option>
-            </select>
-        </div>
+
         <button type="submit" name="compose_report">Составить отчет</button>
 
     </form>
 
     <!-- Таблица результатов -->
     {% if plot_url %}
-    <div>
+    <div >
         <h2>Ваш отчет</h2>
         <img src="data:image/png;base64,{{ plot_url }}" alt="График транзакций" />
     </div>
@@ -51,8 +71,14 @@
         <tbody>
             {% for transaction in transactions %}
                 <tr>
-                    <td>{{ transaction.date }}</td>
-                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td>{{ transaction.date|date:"d.m.Y"  }}</td>
+                    <td>{% if transaction.category.category_type == 'income' %}
+                        Доход
+                    {% elif transaction.category.category_type == 'expense' %}
+                        Расход
+                    {% else %}
+                        Неизвестно
+                    {% endif %}</td>
                     <td>{{ transaction.category.name }}</td>
                     <td>{{ transaction.description }}</td>
                     <td>{{ transaction.amount }}</td>
@@ -64,15 +90,19 @@
     </table>
 
     <!-- Форма сохранения — показываем только если был запрос фильтра (is_filtered) -->
-        {% if filtered %}
-        <form method="post" action="{% url 'save_report' %}">
-            {% csrf_token %}
-            <input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
-            <input type="hidden" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
-            <input type="hidden" name="category" value="{{ selected_category }}">
-            <input type="hidden" name="type" value="{{ selected_type }}">
-            <button type="submit">Сохранить отчёт</button>
-        </form>
+       {% if filtered %}
+<form method="post" action="{% url 'download_chart' %}">
+    {% csrf_token %}
+
+    <input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+    <input type="hidden" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+    <input type="hidden" name="category" value="{{ selected_category }}">
+    <input type="hidden" name="type" value="{{ selected_type }}">
+
+    <button type="submit" name="download_chart" value="1">Сохранить график</button>
+</form>
 {% endif %}
 </div>
+  </main>
 {% endblock %}
+

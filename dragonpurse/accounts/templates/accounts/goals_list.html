@@ -1,8 +1,25 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
+<div class="sidebar">
+        <h1>DragonPurse</h1>
+
+        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <a href="{% url 'add_goal' %}"><button>Добавить цель</button></a>
+        <a href="{% url 'add_goal' %}"><button>Цели друзей</button></a>
+        <a href="{% url 'dashboard' %}"><button>На главную</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
 <h1>Мои цели</h1>
-<p><a href="{% url 'add_goal' %}">Добавить новую цель</a></p>
-<a href="{% url 'shared_users_list' %}" class="button">Посмотреть цели друга</a>
+{% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+{% endif %}
 
 {% for g in goals %}
 <div class="card" style="padding:15px; margin-bottom:15px; border:1px solid #ccc; border-radius:10px;">
@@ -27,7 +44,7 @@
 {% empty %}
 <p>Пока нет целей. <a href="{% url 'add_goal' %}">Добавить новую цель</a></p>
 {% endfor %}
-
+</main>
 <script>
 function confirmDelete(goalId) {
     if (confirm("Вы действительно хотите удалить эту цель?")) {
@@ -36,3 +53,4 @@ function confirmDelete(goalId) {
 }
 </script>
 {% endblock %}
+

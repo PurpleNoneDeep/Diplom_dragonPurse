@@ -3,7 +3,7 @@
 {% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
 <body>
-    <h1>Изменить транзакцию</h1>
+    <h1>Изменить Запланированную транзакцию</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}

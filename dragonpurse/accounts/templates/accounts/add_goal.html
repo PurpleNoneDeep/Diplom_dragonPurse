@@ -1,10 +1,10 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
     <div class="header">
-        <img src="{% static 'images/dragon_head.png' %}" alt="Дракончик" class="dragon">
-        <h1>Добавить цель</h1>
+
+        <h1><img src="{% static 'accounts/img/happy_dragon_head.png' %}" alt="Дракончик" class="dragon"> Добавить цель</h1>
     </div>
     <div class="container">
         {% if messages %}

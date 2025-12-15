@@ -1,147 +1,8 @@
+{% extends "accounts/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Добавление транзакции</title>
-    <style>
-        body {
-            font-family: "Inter", sans-serif;
-            background-color: #0f0f0f;
-            color: #639372;
-            margin: 0;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
+{% block content %}
 
-        h1 {
-            color: #639372;
-            text-align: center;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
-        }
-
-        .container {
-            background-color: #131212;
-            border: 2px solid #639372;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(99, 147, 114, 0.2);
-            padding: 30px 40px;
-            width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        label {
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        input[type="number"],
-        input[type="date"],
-        input[type="text"],
-        select,
-        textarea {
-            background-color: #0f0f0f;
-            color: #639372;
-            border: 1px solid #639372;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 1em;
-            width: 100%;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #8ac8a4;
-            box-shadow: 0 0 6px #639372;
-            outline: none;
-        }
-
-        button {
-            margin-top: 20px;
-            background-color: #131212;
-            color: #639372;
-            border: 2px solid #639372;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        button:hover {
-            background-color: #639372;
-            color: #131212;
-        }
-
-        a {
-            text-align: center;
-            margin-top: 20px;
-            color: #639372;
-            text-decoration: none;
-            font-weight: 500;
-            display: block;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .goal-fields {
-            display: none;
-            background-color: #0f0f0f;
-            border: 1px solid #639372;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(5px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-        .back-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #639372;
-            font-size: 0.95em;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Стиль заголовка с логотипом дракончика */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .dragon {
-            width: 36px;
-            height: 36px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-    </style>
-</head>
-<body>
     <div class="header">
         <img src="{% static 'accounts/img/happy_dragon_head.png' %}" alt="Дракончик" class="dragon">
         <h1>Добавление транзакции </h1>
@@ -182,7 +43,7 @@
     {{ form.description }}
 
     <label for="newdate">Дата:</label>
-    <input type="date" name="newdate" id="newdate" value="{{ current_date }}" />
+    <input type="date" name="newdate" id="newdate" value='{{ current_date|date:"Y-m-d" }}' />
 
     <div id="goal-fields" class="goal-fields">
         <label for="goal">Цель (если хотите отчислить часть дохода):</label>
@@ -199,6 +60,7 @@
 
     <button type="submit">Добавить транзакцию</button>
 </form>
+        <a href="{% url 'transaction_list' %}"><button >Назад</button></a>
     </div>
 
 <script>
@@ -228,16 +90,16 @@ function validateForm() {
 
 // Функция для переключения видимости поля ввода новой категории
 function toggleNewCategoryField() {
-    // Получаем выпадающий список с категориями
     const categorySelect = document.getElementById('category');
-    // Получаем элемент поля ввода для новой категории
     const newCategoryField = document.getElementById('new-category-field');
+    const newCategoryInput = document.getElementById('new_category');
 
-    // Проверяем, выбрана ли "Новая категория"
     if (categorySelect.value === 'new') {
-        newCategoryField.style.display = 'block'; // Показываем поле ввода
+        newCategoryField.style.display = 'block'; // Показываем поле для новой категории
+        newCategoryInput.setAttribute('required', 'required'); // Устанавливаем как обязательное
     } else {
-        newCategoryField.style.display = 'none'; // Скрываем поле ввода
+        newCategoryField.style.display = 'none'; // Скрываем поле
+        newCategoryInput.removeAttribute('required'); // Убираем обязательность
     }
 }
 
@@ -272,9 +134,9 @@ function updateCategories() {
     }
 
     const newCategoryOption = document.createElement('option');
-newCategoryOption.value = 'new'; // Устанавливаем значение для новой категории
-newCategoryOption.textContent = 'Новая категория'; // Устанавливаем текст для новой категории
-categorySelect.appendChild(newCategoryOption); // Добавляем опцию для новой категории в выпадающий список
+    newCategoryOption.value = 'new'; // Устанавливаем значение для новой категории
+    newCategoryOption.textContent = 'Новая категория'; // Устанавливаем текст для новой категории
+    categorySelect.appendChild(newCategoryOption); // Добавляем опцию для новой категории в выпадающий список
 
 // Теперь добавляем остальные категории
 categories.forEach(category => {
@@ -289,5 +151,4 @@ categories.forEach(category => {
 toggleNewCategoryField(); // Проверяем, нужно ли показывать поле для новой категории
 }
     </script>
-</body>
-</html>
+{% endblock %}

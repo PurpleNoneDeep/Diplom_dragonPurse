@@ -10,19 +10,9 @@
     {% endblock %}
 </head>
 <body>
-    <header>
-        <h1>
-            <img src="{% static 'accounts/img/happy_dragon_head.png' %}" width="50" height="50" alt="Счастливый дракончик">
-            <a href="{% url 'dashboard' %}">DragonPurse</a>
-        </h1>
-        <div>
-            Привет, {{ user.username }} | <a href="{% url 'logout' %}">Выйти</a>
-        </div>
-    </header>
 
-    <div class="container">
         {% block content %}{% endblock %}
-    </div>
+
 
     {% block extra_scripts %}{% endblock %}
 </body>

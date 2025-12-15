@@ -1,10 +1,16 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block title %}Уведомления{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
  <div class="sidebar">
         <h1>DragonPurse</h1>
-
+        <a href="{% url 'dashboard' %}"><button>Главная</button></a>
         <a href="{% url 'notifications_inbox' %}"><button>Входящие</button></a>
-        <a href="{% url 'notifications_all' %}"><button>Все уведомления</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Все уведомления</button></a>
+
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
     </div>
 
 <div class="notifications-container" style="display: flex; gap: 20px;">
@@ -12,6 +18,11 @@
 
 
 <main style="flex-grow: 1;">
+{% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+{% endif %}
 <h1>Уведомления</h1>
 
 

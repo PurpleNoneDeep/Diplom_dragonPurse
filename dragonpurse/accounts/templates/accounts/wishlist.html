@@ -1,9 +1,25 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
-<h1>Мой Wishlist</h1>
+<div class="sidebar">
+        <h1><a href="{% url 'transaction_list' %}">DragonPurse</a></h1>
 
-<a href="{% url 'wishlist_create' %}" class="button" style="margin-bottom:15px; display:inline-block;">Добавить желание</a>
-<a href="{% url 'shared_users_list' %}" class="button">👥 Посмотреть цели друга</a>
+        <a href="{% url 'wishlist_create' %}"><button>Добавить желание</button></a>
+        <a href="{% url 'wishlist_create' %}"><button>Желания друзей</button></a>
+
+        <div class="line"></div>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+</div>
+<main>
+
+<h1>Мой Wishlist</h1>
+{% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+{% endif %}
 
 {% if wishlists %}
 <table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;">
@@ -32,4 +48,6 @@
 {% else %}
 <p>Пока нет желаний. Добавь первое!</p>
 {% endif %}
+</main>
 {% endblock %}
+

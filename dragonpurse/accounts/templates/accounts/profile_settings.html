@@ -1,0 +1,30 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% block title %}Настройки профиля{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
+{% block content %}
+<div class="sidebar">
+        <h1>DragonPurse</h1>
+
+        <a href="{% url 'transaction_list' %}"><button>Главная</button></a>
+        <a href="{% url 'change_name' %}"><button>Изменить имя</button></a>
+        <a href="{% url 'change_email' %}"><button>Изменить почту</button></a>
+        <a href="{% url 'change_password' %}"><button>Изменить пароль</button></a>
+        <a href="{% url 'settings' %}"><button>Вернуться к настройкам</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
+    {% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+    {% endif %}
+    <h1>Профиль пользователя</h1>
+    <p>Имя пользователя: {{ user.username }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Дата регистрации: {{ user.date_joined }}</p>
+
+</main>
+{% endblock %}

@@ -1,8 +1,30 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
+
+ <div class="sidebar">
+        <h1>DragonPurse</h1>
+
+        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <a href="{% url 'planned_expense_create' %}"><button>Добавить запланированную транзакцию</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
+        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
+        <a href="{% url 'goals_list' %}"><button>Цели</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
+        <a href="{% url 'login' %}"><button>Настройки</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
+{% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+{% endif %}
 <h1>Запланированные транзакции</h1>
 
-<a href="{% url 'planned_expense_create' %}" class="button">Добавить</a>
 
 {% if planned_items %}
 <table border="1" cellpadding="8" style="border-collapse:collapse; width:100%; margin-top:10px;">
@@ -27,7 +49,7 @@
       <td>{{ item.get_status_display|default:"—" }}</td>
       <td>{% if item.reminder %}✅{% else %}—{% endif %}</td>
       <td>
-        <a href="{% url 'planned_expense_edit' item.pk %}">Изменить</a> |
+        <a href="{% url 'planned_edit' item.pk %}">Изменить</a> |
         <a href="{% url 'planned_expense_delete' item.pk %}">Удалить</a>
       </td>
     </tr>
@@ -37,4 +59,6 @@
 {% else %}
 <p>Нет запланированных транзакций. Добавьте первую!</p>
 {% endif %}
+    </main>
 {% endblock %}
+

@@ -1,6 +1,21 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
-<body>
+<div class="sidebar">
+        <h1>DragonPurse</h1>
+
+        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
+        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
+        <a href="{% url 'goals_list' %}"><button>Цели</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
+        <a href="{% url 'settings' %}"><button>Настройки</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+</div>
+<main>
 <h1>Совместный доступ</h1>
 <div class="container">
     <h1>Пользователи с доступом к вашему аккаунту</h1>
@@ -44,7 +59,8 @@
 
 <hr>
 
-<p><a href="{% url 'invites_list' %}">📨 Мои приглашения</a></p>
+<p><a href="{% url 'notifications_inbox' %}">Мои приглашения</a></p>
 <p><a href="{% url 'dashboard' %}">Вернуться</a></p>
-</body>
+</main>
 {% endblock %}
+

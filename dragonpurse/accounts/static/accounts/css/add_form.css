@@ -113,14 +113,6 @@
             text-decoration: underline;
         }
 
-        /* Стиль заголовка с логотипом дракончика */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
 
         .dragon {
             width: 36px;

@@ -54,7 +54,8 @@ class Transaction(models.Model):
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    notification_type = models.CharField(max_length=255, blank=True, null=True)  # Добавляем новое поле
+    created_at = models.DateTimeField(auto_now_add=False)
     is_read = models.BooleanField(default=False)
 
     def __str__(self):

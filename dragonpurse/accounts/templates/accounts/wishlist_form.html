@@ -1,4 +1,6 @@
 {% extends "accounts/base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
 <h2>{{ title }}</h2>
 <form method="post">
@@ -8,3 +10,8 @@
   <a href="{% url 'wishlist_list' %}" class="button">Назад</a>
 </form>
 {% endblock %}
+
+
+
+
+

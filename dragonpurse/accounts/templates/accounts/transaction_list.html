@@ -1,25 +1,31 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/transactions.css' %}">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/transactions.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">{% endblock %}
 {% block content %}
-<main >
     <div class="sidebar">
-        <a href="{% url 'dashboard' %}"><button>Главная</button></a>
+      <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
         <a href="{% url 'category_list' %}"><button>Категории</button></a>
         <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
         <a href="{% url 'planned_expense_list' %}"><button>Запланированные транзакции</button></a>
-        <a href="{% url 'report_builder' %}"><button>Отчет</button></a>
+        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
-        <a href="{% url 'wishlist_list' %}"><button>Вишлист</button></a>
-        <a href="{% url 'notifications_all' %}"><button>Уведомления</button></a>
+        <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
+        <div class="line"></div>
         <a href="{% url 'settings' %}"><button>Настройки</button></a>
         <a href="{% url 'logout' %}"><button>Выйти</button></a>
     </div>
+<main >
 
     <!-- Основная часть -->
     <div class="main-content">
         <h1>Календарь транзакций</h1>
-
+  {% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+    {% endif %}
         <div class="calendar-container">
             <div class="header">
                 <select id="year-select"></select>
@@ -31,42 +37,61 @@
             <div class="calendar" id="calendar"></div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Дата</th>
-                    <th>Тип</th>
-                    <th>Категория</th>
-                    <th>Описание</th>
-                    <th>Сумма</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in transactions %}
-                    <tr>
-                        <td>{{ transaction.date }}</td>
-                        <td>{{ transaction.category.category_type }}</td>
-                        <td>{{ transaction.category.name }}</td>
-                        <td>{{ transaction.description }}</td>
-                        <td>{{ transaction.amount }}</td>
-                        <td>
-                            <a href="{% url 'transaction_edit' transaction.id %}"><button class="btn-danger">Изменить</button></a>
-                            <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
+        <form method="get" action="{% url 'transaction_list' %}">
+    <label for="type">Фильтр по типу:</label>
+    <select name="type" id="type">
+        <option value="">Все</option>
+        <option value="income" {% if transaction_type == 'income' %}selected{% endif %}>Доходы</option>
+        <option value="expense" {% if transaction_type == 'expense' %}selected{% endif %}>Расходы</option>
+    </select>
+          <label for="category_name">Поиск по категории:</label>
+    <input type="text" name="category_name" id="category_name" value="{{ category_name }}" placeholder="Введите название категории" />
+    
+    <button type="submit">Применить</button>
+</form>
 
+<table>
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th>Сумма</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date|date:"d.m.Y" }}</td>
+                <td>
+                    {% if transaction.category.category_type == 'income' %}
+                        Доход
+                    {% elif transaction.category.category_type == 'expense' %}
+                        Расход
+                    {% else %}
+                        Неизвестно
+                    {% endif %}
+                </td>
+                <td>{{ transaction.category.name }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>
+                    <a href="{% url 'transaction_edit'  transaction.id %}"><button class="btn-danger">Изменить</button></a>
+                    <form action="{% url 'transaction_delete' transaction.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
                                 <button type="submit" class="btn-danger">Удалить</button>
                             </form>
-
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="6">Нет транзакций.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Нет транзакций.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
         <script>
             const calendarEl = document.getElementById('calendar');

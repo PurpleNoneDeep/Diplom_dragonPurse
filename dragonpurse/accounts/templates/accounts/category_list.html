@@ -1,9 +1,23 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/header.css' %}">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+{% endblock %}
 {% block content %}
-    <a href="{% url 'category_create' %}"><button>Добавить новую категорию</button></a>
+<div class="sidebar">
+        <h1>DragonPurse</h1>
 
+        <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
+        <a href="{% url 'category_create' %}"><button>Добавить категорию</button></a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+
+    </div>
+<main>
+    {% if messages %}
+            {% for m in messages %}
+                <div class="alert" style="color:#ffcc00; margin-bottom:10px;">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
     <h1>Ваши категории</h1>
 <form method="get" action="{% url 'category_list' %}">
     <label for="category_type">Фильтровать по типу:</label>
@@ -41,5 +55,5 @@
         {% endfor %}
     </tbody>
 </table>
-
+</main>
 {% endblock %}

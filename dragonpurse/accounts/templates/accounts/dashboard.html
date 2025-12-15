@@ -1,173 +1,102 @@
+{% extends "accounts/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Личный кабинет</title>
-    <style>
-        body {
-            background-color: #0f0f0f;
-            font-family: "Segoe UI", sans-serif;
-            color: #639372;
-            margin: 0;
-            display: flex;
-        }
+{% block title %}Личный кабинет{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+<style>
+    .animated-dragon1 {
+    width: 200px; /* Укажите ширину */
+    height: 300px; /* Укажите высоту */
+    animation: frameAnimation 1s steps(2) infinite; /* Запуск анимации */
+}
 
-        header {
-            padding: 20px;
-            text-align: center;
-        }
+@keyframes frameAnimation {
+    0% {
+        content: url('{% static "accounts/img/happy_dragon.png" %}'); /* Кадр 1 */
+    }
+    33% {
+        content: url('{% static "accounts/img/happy_dragon_2.png" %}'); /* Кадр 2 */
+    }
+    66% {
+        content: url('{% static "accounts/img/happy_dragon_3.png" %}'); /* Кадр 3 */
+    }
+    100% {
+        content: url('{% static "accounts/img/happy_dragon.png" %}'); /* Возврат к Кадру 1 */
+    }
+}
+.animated-dragon2 {
+    width: 200px; /* Укажите ширину */
+    height: 300px; /* Укажите высоту */
+    animation: frameAnimation2 1s steps(2) infinite; /* Запуск анимации */
+}
 
-        h1, h2, p, a {
-            color: #639372;
-        }
+@keyframes frameAnimation2 {
+    0% {
+        content: url('{% static "accounts/img/sad_dragon.png" %}'); /* Кадр 1 */
+    }
+    33% {
+        content: url('{% static "accounts/img/sad_dragon_2.png" %}'); /* Кадр 2 */
+    }
+    66% {
+        content: url('{% static "accounts/img/sad_dragon_3.png" %}'); /* Кадр 3 */
+    }
+    100% {
+        content: url('{% static "accounts/img/sad_dragon.png" %}'); /* Возврат к Кадру 1 */
+    }
+}
+    .animated-dragon3 {
+    width: 200px; /* Укажите ширину */
+    height: 300px; /* Укажите высоту */
+    animation: frameAnimation3 1s steps(2) infinite; /* Запуск анимации */
+}
 
-        /* ======= ЛЕВАЯ ПАНЕЛЬ ======= */
-        .sidebar {
-            width: 220px;
-            background-color: #131212;
-            border-right: 2px solid #639372;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 10px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-        }
+@keyframes frameAnimation3 {
+    0% {
+        content: url('{% static "accounts/img/angry_dragon.png" %}'); /* Кадр 1 */
+    }
+    33% {
+        content: url('{% static "accounts/img/angry_dragon_2.png" %}'); /* Кадр 2 */
+    }
+    66% {
+        content: url('{% static "accounts/img/angry_dragon_3.png" %}'); /* Кадр 3 */
+    }
+    100% {
+        content: url('{% static "accounts/img/angry_dragon.png" %}'); /* Возврат к Кадру 1 */
+    }
+}
 
-        .sidebar h1 {
-            font-size: 1.6em;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .sidebar a {
-            text-decoration: none;
-            width: 100%;
-        }
-
-        .sidebar button {
-            width: 90%;
-            margin: 5px 0;
-            padding: 10px;
-            border: 2px solid #639372;
-            border-radius: 10px;
-            background-color: #131212;
-            color: #639372;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        .sidebar button:hover {
-            background-color: #639372;
-            color: #131212;
-            transform: scale(1.05);
-        }
-
-        /* ======= ОСНОВНОЙ КОНТЕНТ ======= */
-        main {
-            margin-left: 240px;
-            padding: 30px;
-            flex: 1;
-        }
-
-        .dashboard {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .card {
-            background-color: #131212;
-            border: 2px solid #639372;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            flex: 1;
-            padding: 20px;
-            text-align: center;
-            text-decoration: none;
-            color: #639372;
-            transition: background-color 0.3s;
-        }
-
-        .card:hover {
-            background-color: #639372;
-            color: #131212;
-        }
-
-        .card h2 {
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .analytics {
-            background-color: #131212;
-            border: 2px solid #639372;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .logout {
-            margin-top: auto;
-            border-top: 2px solid #639372;
-            padding-top: 15px;
-        }
-
-        .logout a {
-            color: #ff6666;
-            text-decoration: none;
-        }
-
-        .logout a:hover {
-            text-decoration: underline;
-        }
-
-
-        .welcome-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 20px;
-            margin: 20px;
-        }
-
-        a {
-            color: #639372;
-        }
-    </style>
-</head>
-
-<body>
+</style>{% endblock %}
+{% block content %}
 
     <div class="sidebar">
-        <h1>ДракоФин</h1>
+        <h1>DragonPurse</h1>
 
         <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
         <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
-        <a href="{% url 'notifications_all' %}"><button>Уведомления</button></a>
+        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
         <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <a href="{% url 'settings' %}"><button>Настройки</button></a>
-
-            <a href="{% url 'logout' %}">Выйти</a>
+        <div class="line"></div>
+        <a href="{% url 'logout' %}"><button>Выйти</button></a>
 
     </div>
 
 
     <main>
         <div class="welcome-container">
-        <h1>Добро пожаловать, {{ user.username }}!</h1>
-            <img src="{% static 'accounts/img/happy_dragon.png' %}" width="200" height="300" alt="Счастливый дракончик">
-        </div>
-
+    <h1>Добро пожаловать, {{ user.username }}!</h1>
+    {% if balance > 0 %}
+        <img class="animated-dragon1" src="{% static 'accounts/img/happy_dragon.png' %}" width="200" height="300" alt="Счастливый дракончик">
+    {% elif balance == 0 %}
+        <img class="animated-dragon2" src="{% static 'accounts/img/happy_dragon_2.png' %}" width="200" height="300" alt="Счастливый дракончик">
+    {% else %}
+        <img class="animated-dragon3" src="{% static 'accounts/img/happy_dragon_3.png' %}" width="200" height="300" alt="Счастливый дракончик">
+    {% endif %}
+</div>
         <div class="dashboard">
-            <a href="{% url 'report_builder' %}" class="card">
+
+            <a href="{% url 'login' %}" class="card">
                 <h2>Баланс</h2>
                 <p>{{ balance|floatformat:2 }} BYN</p>
             </a>
@@ -186,9 +115,7 @@
         <!-- Нижний блок — Аналитика -->
         <div class="analytics">
             <h2>Аналитика</h2>
-            <p>Здесь будет ваша статистика по тратам, доходам и накоплениям.</p>
             <img src="data:image/png;base64,{{ graphic }}" alt="График транзакций за текущий месяц" width="600" height="500">
         </div>
     </main>
-</body>
-</html>
+{% endblock %}

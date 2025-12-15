@@ -3,12 +3,12 @@
 {% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
 <body>
-    <h1>Изменить транзакцию</h1>
+    <h1>Изменить желание</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Сохранить изменения</button>
     </form>
-    <a href="{% url 'transaction_list' %}">Назад</a>
+    <a href="{% url 'wishlist_list' %}">Назад</a>
 </body>
 {% endblock %}
