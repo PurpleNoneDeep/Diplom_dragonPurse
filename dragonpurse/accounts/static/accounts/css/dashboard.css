@@ -57,7 +57,7 @@ body {
             width: 150px; /* Ширина линии */
             height: 2px; /* Высота линии */
 
-            background-color: #639372; /* Цвет линии */
+            background-color: #FF8C00; /* Цвет линии */
             margin: 10px 20px 10px 0px; /* Отступ от кнопок */
         }
         .sidebar button:hover {

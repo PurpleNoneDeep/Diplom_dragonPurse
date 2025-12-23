@@ -640,10 +640,11 @@ class ReportBuilderView(LoginRequiredMixin, View):
             transactions = transactions.filter(date__date__gte=start_date)
         if end_date:
             transactions = transactions.filter(date__date__lte=end_date)
-        if selected_category:
-            transactions = transactions.filter(category__id=selected_category)
+
         if selected_type:
             categories = categories.filter(category_type=selected_type)
+        if selected_category:
+            transactions = transactions.filter(category__id=selected_category)
 
         filtered = True
 

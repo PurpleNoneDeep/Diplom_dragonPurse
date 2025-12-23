@@ -4,14 +4,16 @@
 <link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-        <h1><a href="{% url 'transaction_list' %}">DragonPurse</a></h1>
+        <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
 
         <a href="{% url 'wishlist_create' %}"><button>Добавить желание</button></a>
         <a href="{% url 'shared_wishlist' %}"><button>Желания друзей</button></a>
 
         <div class="line"></div>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
 </div>
 <main>
 
@@ -39,8 +41,8 @@
       <td>{{ w.description|default:"—" }}</td>
       <td>{{ w.status|default:"—" }}</td>
       <td>
-        <a href="{% url 'wishlist_edit' w.pk %}">Изменить</a> |
-        <a href="{% url 'wishlist_delete' w.pk %}">Корзина</a>
+        <a href="{% url 'wishlist_edit' w.pk %}"><button>Изменить</button></a>
+        <a href="{% url 'wishlist_delete' w.pk %}"><button>Корзина</button></a>
       </td>
     </tr>
     {% endfor %}

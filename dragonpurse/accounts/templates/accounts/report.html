@@ -5,8 +5,7 @@
 <link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-      <h1>DragonPurse</h1>
-        <a href="{% url 'dashboard' %}"><button>Главная</button></a>
+      <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
         <a href="{% url 'category_list' %}"><button>Категории</button></a>
         <a href="{% url 'transaction_create' %}"><button>Добавить транзакцию</button></a>
         <a href="{% url 'transaction_list' %}"><button>Запланированные транзакции</button></a>
@@ -15,7 +14,10 @@
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <a href="{% url 'transaction_list' %}"><button>Уведомления</button></a>
         <div class="line"></div>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
     </div>
 <main>
 <div class="container">

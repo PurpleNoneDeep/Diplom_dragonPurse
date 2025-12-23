@@ -14,8 +14,10 @@
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
         <div class="line"></div>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
     </div>
 <main >
 
