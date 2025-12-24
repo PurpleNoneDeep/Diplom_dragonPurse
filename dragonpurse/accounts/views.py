@@ -905,24 +905,32 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
 class NotificationDetailView(View):
     def get(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk)
+        if notification.notification_type == "access":
+            invite = get_object_or_404(
+                SharedAccessInvite,
+                receiver=request.user,
+                status='pending'
+            )
 
-        invite = get_object_or_404(
-            SharedAccessInvite,
-            receiver=request.user,
-            status='pending'
-        )
+            form = SharedAccountForm(initial={'email': invite.sender.email})
 
-        form = SharedAccountForm(initial={'email': invite.sender.email})
-
-        return render(
-            request,
-            "accounts/notification_detail.html",
-            {
-                "notification": notification,
-                "form": form,
-                "invite": invite
-            }
-        )
+            return render(
+                request,
+                "accounts/notification_detail.html",
+                {
+                    "notification": notification,
+                    "form": form,
+                    "invite": invite
+                }
+            )
+        else:
+            return render(
+                request,
+                "accounts/notification_detail.html",
+                {
+                    "notification": notification
+                }
+            )
     def post(self, request, pk):
         action = request.POST.get('action')
 
@@ -1011,7 +1019,7 @@ class NotificationDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk, user=request.user)
         notification.delete()
-        messages.success(request, "Планируемая транзакция удалена.")
+        messages.success(request, "Уведомление удалено.")
         return redirect('notifications_inbox')
 
 

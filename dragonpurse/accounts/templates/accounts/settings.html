@@ -5,12 +5,16 @@
 <link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-  <h1>DragonPurse</h1>
+  <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
     <div>
         <a href="{% url 'settings_interface' %}"><button>Настроить интерфейс</button></a>
         <a href="{% url 'profile' %}"><button>Настроить профиль</button></a>
         <a href="{% url 'shared_account' %}"><button>Настроить совместный доступ</button></a>
-        <a href="{% url 'dashboard' %}"><button>Вернуться</button></a>
+        <div class="line"></div>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
     </div>
 
 </div>

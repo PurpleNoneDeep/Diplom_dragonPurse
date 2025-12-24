@@ -6,8 +6,6 @@
 {% block content %}
  <div class="sidebar">
         <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
-        <a href="{% url 'notifications_inbox' %}"><button>Входящие</button></a>
-        <a href="{% url 'notifications_inbox' %}"><button>Все уведомления</button></a>
 
         <div class="line"></div>
         <div style="display: flex; margin: 5px;">
@@ -28,26 +26,41 @@
 {% endif %}
 <h1>Уведомления</h1>
 
-
 {% if notifications %}
 <ul style="list-style: none; padding: 0;">
-{% for n in notifications %}
-<li style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; background: {% if n.is_read %}#e5ffe5{% else %}#fff{% endif %};">
-<a href="{% url 'notification_detail' n.id %}" style="text-decoration:none; color: black;">
-<strong>{{ n.created_at|date:"d.m.Y H:i" }}</strong> — {{ n.message }}
-</a>
-<form method="post" action="{% url 'notification_delete' n.id %}" style="display:inline; float:right;">
-{% csrf_token %}
+    {% for n in notifications %}
+    <li
+        style="
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: {% if n.is_read %}#e5ffe5{% else %}#fff{% endif %};
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        "
+    >
+        <!-- ТЕКСТ УВЕДОМЛЕНИЯ -->
+        <a
+            href="{% url 'notification_detail' n.id %}"
+            style="text-decoration: none; color: black; flex: 1;"
+        >
+            <strong>{{ n.created_at|date:"d.m.Y H:i" }}</strong>
+            — {{ n.message }}
+        </a>
 
-</form>
-<button type="submit">Удалить</button>
-
-</li>
-{% endfor %}
+        <!-- КНОПКА УДАЛЕНИЯ -->
+        <form method="post" action="{% url 'notification_delete' n.id %}" style="margin-left: 15px;">
+            {% csrf_token %}
+            <button type="submit">Удалить</button>
+        </form>
+    </li>
+    {% endfor %}
 </ul>
 {% else %}
 <p>Пока нет уведомлений</p>
 {% endif %}
+
 </main>
 </div>
 {% endblock %}
