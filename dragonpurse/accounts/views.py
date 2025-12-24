@@ -495,6 +495,14 @@ class GoalDetailView(LoginRequiredMixin, View):
         percent = 0
         if total_goal_amount > 0:
             percent = (total_saved / total_goal_amount * 100).quantize(Decimal('0.01'))
+            if percent > 100:
+                percent = 100
+        if percent < 33:
+            color = '#f44336'
+        elif percent < 66:
+            color = '#ff9800'
+        else:
+            color = '#4caf50'
 
         # Проверка и обновление статуса
         if total_saved >= total_goal_amount:
@@ -510,6 +518,7 @@ class GoalDetailView(LoginRequiredMixin, View):
             'total_goal_amount': total_goal_amount,
             'total_saved': total_saved,
             'percent': percent,
+            'color':color
         })
 class GoalsListView(LoginRequiredMixin, View):
     template_name = 'accounts/goals_list.html'
@@ -644,8 +653,9 @@ class ReportBuilderView(LoginRequiredMixin, View):
         # 1. Получаем значения полей
         start_date = parse_date(request.POST.get("start_date"))
         end_date = parse_date(request.POST.get("end_date"))
+        selected_type = request.POST.get("type")
         selected_category = request.POST.get("category")
-        selected_type = request.POST.get("type")  # income / expense
+          # income / expense
 
         # 2. Фильтруем
         if start_date:
@@ -654,6 +664,9 @@ class ReportBuilderView(LoginRequiredMixin, View):
             transactions = transactions.filter(date__date__lte=end_date)
 
         if selected_type:
+            transactions = transactions.filter(
+                category__category_type=selected_type
+            )
             categories = categories.filter(category_type=selected_type)
         if selected_category:
             transactions = transactions.filter(category__id=selected_category)

@@ -21,34 +21,32 @@
 <p><strong>Статус:</strong> {{ goal.get_status_display }}</p>
 
 <h3>Прогресс накопления:</h3>
-<div style="width:100%; background-color:#eee; border-radius:10px; height:25px;">
-  <div style="width:{{ percent }}%; background-color:#4caf50; height:100%; border-radius:10px; color:white; text-align:center; line-height:25px;">
+<div style=" background-color:#eee; border-radius:10px; height:25px;">
+  <div style="width:{{ percent }}%; background-color:{{ color }}; height:100%; border-radius:10px; color:white; text-align:center; line-height:25px;">
     {{ percent }}%
   </div>
 </div>
 <p><strong>Накоплено:</strong> {{ total_saved|floatformat:2 }} BYN из {{ total_goal_amount|floatformat:2 }} BYN</p>
 
-<hr>
 
 <h3>Участники</h3>
 <table border="1" cellpadding="8" style="border-collapse:collapse;">
   <thead>
     <tr>
       <th>Пользователь</th>
-      <th>Целевая сумма</th>
+      <th>Почта</th>
     </tr>
   </thead>
   <tbody>
     {% for p in participants %}
     <tr>
-      <td>{{ p.user.username }} ({{ p.user.email }})</td>
-      <td>{{ p.amount|floatformat:2 }} BYN</td>
+      <td>{{ p.user.username }} </td>
+      <td>({{ p.user.email }})</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
-<hr>
 
 <h3>Транзакции</h3>
 <table border="1" cellpadding="8" style="border-collapse:collapse;">
