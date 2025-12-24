@@ -8,7 +8,20 @@
         <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
 
         <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
-        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
+        <a href="{% url 'notifications_inbox' %}" style="position: relative; display: inline-block;">
+            <button>Уведомления</button>
+            {% if has_unread %}
+        <span style="
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+        "></span>
+    {% endif %}</a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <div class="line"></div>

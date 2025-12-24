@@ -7,8 +7,10 @@
         <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
         <a href="{% url 'goals_list' %}"><button>Назад к целям</button></a>
         <div class="line"></div>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
 
     </div>
 <main>

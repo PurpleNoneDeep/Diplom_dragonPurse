@@ -7,12 +7,27 @@
         <h1><a href="{% url 'transaction_list' %}">DragonPurse</a></h1>
 
         <a href="{% url 'notifications_inbox' %}"><button>Мои приглашения</button></a>
-        <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
+        <a href="{% url 'notifications_inbox' %}" style="position: relative; display: inline-block;">
+            <button>Уведомления</button>
+            {% if has_unread %}
+        <span style="
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+        "></span>
+    {% endif %}</a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
         <div class="line"></div>
-        <a href="{% url 'settings' %}"><button>Настройки</button></a>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
 </div>
 <main>
 <h1>Совместный доступ</h1>

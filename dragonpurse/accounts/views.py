@@ -51,7 +51,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from .models import SharedAccess, Goal, Wishlist, UserGoal
 
-
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Notification
 from django.contrib.auth.decorators import login_required
@@ -65,6 +64,13 @@ from .models import Transaction, Category, Analytics
 from django.views.decorators.http import require_POST
 User = get_user_model()
 
+
+def get_unread_notifications_flag(user):
+
+    if not user.is_authenticated:
+        return False
+
+    return Notification.objects.filter(user=user, is_read=False).exists()
 
 class IndexView(LoginRequiredMixin, View):
     def get(self, request):
@@ -106,7 +112,7 @@ class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         now = timezone.now()
-
+        has_unread = get_unread_notifications_flag(request.user)
         first_day_of_month = now.replace(day=1)
         last_day_of_month = (first_day_of_month + timezone.timedelta(days=31)).replace(day=1) - timezone.timedelta(
             days=1)
@@ -186,6 +192,7 @@ class DashboardView(LoginRequiredMixin, View):
             'income_total': income_total,
             'expense_total': expense_total,
             'graphic': graphic,
+            'has_unread': has_unread,
         }
         return render(request, 'accounts/dashboard.html', context)
 
@@ -226,6 +233,7 @@ class RegisterView(View):
 class TransactionListView(View):
     def get(self, request):
         # Получаем параметры
+        has_unread = get_unread_notifications_flag(request.user)
         selected_year = request.GET.get('year')
         selected_month = request.GET.get('month')
         selected_day = request.GET.get('day')
@@ -274,7 +282,9 @@ class TransactionListView(View):
             'selected_month': selected_month,
             'selected_day': selected_day,
             'transaction_type': transaction_type,  # Передаем выбранный тип транзакции в шаблон
-            'category_name': category_name,  # Передаем введенное название категории для поиска
+            'category_name': category_name,
+            'has_unread':has_unread
+
         })
 
 class TransactionCreateView(View):
@@ -606,6 +616,7 @@ class ReportBuilderView(LoginRequiredMixin, View):
     template_name = "accounts/report.html"
 
     def get(self, request):
+        has_unread = get_unread_notifications_flag(request.user)
         user = request.user
         transactions = Transaction.objects.filter(user=user).order_by('-date')
         categories = Category.objects.filter(user=user)
@@ -619,12 +630,13 @@ class ReportBuilderView(LoginRequiredMixin, View):
             "end_date": None,
             "selected_category": None,
             "selected_type": None,
+            "has_unread": has_unread
         }
         return render(request, self.template_name, context)
 
     def post(self, request):
         user = request.user
-
+        has_unread = get_unread_notifications_flag(request.user)
         # Базовый queryset — только транзакции пользователя
         transactions = Transaction.objects.filter(user=user).order_by('-date')
         categories = Category.objects.filter(user=user)
@@ -668,6 +680,7 @@ class ReportBuilderView(LoginRequiredMixin, View):
                 "selected_category": selected_category,
                 "selected_type": selected_type,
                 "transactions": transactions,
+                "has_unread": has_unread
             }
             return render(request, self.template_name, context)
 
@@ -725,7 +738,8 @@ class ReportBuilderView(LoginRequiredMixin, View):
             "end_date": end_date,
             "selected_category": selected_category,
             "selected_type": selected_type,
-            "plot_url": image_base64,  # График в формате base64
+            "plot_url": image_base64,
+            "has_unread": has_unread# График в формате base64
         }
 
         return render(request, self.template_name, context)
@@ -819,6 +833,7 @@ class PlannedExpenseListView(LoginRequiredMixin, View):
     template_name = 'accounts/planned_expense_list.html'
 
     def get(self, request):
+        has_unread = get_unread_notifications_flag(request.user)
         # Проверяем напоминания для текущего пользователя
         today = timezone.localdate()
         planned_items = PlannedExpense.objects.filter(user=request.user)
@@ -839,7 +854,7 @@ class PlannedExpenseListView(LoginRequiredMixin, View):
                         created_at=expense.reminder_time
                     )
 
-        return render(request, self.template_name, {'planned_items': planned_items})
+        return render(request, self.template_name, {'planned_items': planned_items, 'has_unread': has_unread})
 
 class PlannedExpenseCreateView(LoginRequiredMixin, FormView):
     form_class = PlannedExpenseForm
@@ -905,6 +920,7 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
 class NotificationDetailView(View):
     def get(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk)
+        has_unread = get_unread_notifications_flag(request.user)
         if notification.notification_type == "access":
             invite = get_object_or_404(
                 SharedAccessInvite,
@@ -920,7 +936,8 @@ class NotificationDetailView(View):
                 {
                     "notification": notification,
                     "form": form,
-                    "invite": invite
+                    "invite": invite,
+                    "has_unread": has_unread
                 }
             )
         else:
@@ -928,12 +945,13 @@ class NotificationDetailView(View):
                 request,
                 "accounts/notification_detail.html",
                 {
-                    "notification": notification
+                    "notification": notification,
+                    "has_unread": has_unread
                 }
             )
     def post(self, request, pk):
         action = request.POST.get('action')
-
+        has_unread = get_unread_notifications_flag(request.user)
         sender_email = request.POST.get('sender_email')
 
         invite = get_object_or_404(
@@ -962,7 +980,8 @@ class NotificationDetailView(View):
                     "accounts/notification_detail.html",
                     {
                         "notification": notification,
-                        "form": form
+                        "form": form,
+                        "has_unread": has_unread
                     }
                 )
 
@@ -1026,7 +1045,7 @@ class NotificationDeleteView(LoginRequiredMixin, View):
 class SharedAccountView(View):
     def get(self, request):
         form = SharedAccountForm()
-
+        has_unread = get_unread_notifications_flag(request.user)
         shared_with_users = SharedAccess.objects.filter(
             owner=request.user
         ).select_related('shared_with')
@@ -1041,13 +1060,14 @@ class SharedAccountView(View):
             {
                 'form': form,
                 'shared_with_users': shared_with_users,
-                'received_accesses': received_accesses
+                'received_accesses': received_accesses,
+                'has_unread': has_unread
             }
         )
 
     def post(self, request):
         form = SharedAccountForm(request.POST)
-
+        has_unread = get_unread_notifications_flag(request.user)
         if not form.is_valid():
             messages.error(request, 'Ошибка в форме. Пожалуйста, исправьте и повторите попытку.')
             return render(request, 'accounts/shared_account.html', {'form': form})
@@ -1063,7 +1083,7 @@ class SharedAccountView(View):
                 request,
                 'Пользователь с таким адресом электронной почты не найден.'
             )
-            return render(request, 'accounts/shared_account.html', {'form': form})
+            return render(request, 'accounts/shared_account.html', {'form': form, 'has_unread': has_unread})
 
         # 🚫 НЕЛЬЗЯ ОТПРАВЛЯТЬ ДОСТУП САМОМУ СЕБЕ
         if recipient_user == request.user:
