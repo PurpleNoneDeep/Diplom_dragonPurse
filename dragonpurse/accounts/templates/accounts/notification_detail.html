@@ -38,7 +38,7 @@
     </form>
 </div>
 {% endif %}
-{% if notification.notification_type == "shared_access" %}
+{% if notification.notification_type == "access" %}
 <div class="planned-actions">
     <form method="post">
         {% csrf_token %}

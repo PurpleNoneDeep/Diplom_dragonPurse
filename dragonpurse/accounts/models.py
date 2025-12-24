@@ -52,9 +52,14 @@ class Transaction(models.Model):
         return f"{self.date} - {self.category.name if self.category else 'Без категории'} - {self.amount}"
 
 class Notification(models.Model):
+    NOTE_CHOICES = [
+        ('planned', 'Запланировано'),
+        ('access', 'Доступы'),
+        ('other', 'Другое'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
-    notification_type = models.CharField(max_length=255, blank=True, null=True)  # Добавляем новое поле
+    notification_type = models.CharField(max_length=255, choices=NOTE_CHOICES, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=False)
     is_read = models.BooleanField(default=False)
 

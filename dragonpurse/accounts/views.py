@@ -905,10 +905,24 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
 class NotificationDetailView(View):
     def get(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk)
-        invite = get_object_or_404(SharedAccessInvite)
-        form = SharedAccountForm(initial={'email': invite.sender.email})
-        return render(request, "accounts/notification_detail.html", {"notification": notification, "form":form, "invite":invite})
 
+        invite = get_object_or_404(
+            SharedAccessInvite,
+            receiver=request.user,
+            status='pending'
+        )
+
+        form = SharedAccountForm(initial={'email': invite.sender.email})
+
+        return render(
+            request,
+            "accounts/notification_detail.html",
+            {
+                "notification": notification,
+                "form": form,
+                "invite": invite
+            }
+        )
     def post(self, request, pk):
         action = request.POST.get('action')
 
@@ -954,15 +968,10 @@ class NotificationDetailView(View):
             user_b = invite.receiver   # тот, кто сейчас нажал кнопку
 
             # ===== 2. ДАННЫЕ ОТ ПОЛЬЗОВАТЕЛЯ A =====
-            access_data_a = []
+            message_text = invite.message or ""
 
-            if invite.message:
-                access_data_a = [
-                    item.strip() for item in invite.message.split(',')
-                ]
-
-            can_a_goals = 'goals' in access_data_a
-            can_a_wishlist = 'wishlist' in access_data_a
+            can_a_goals = 'goals' in message_text
+            can_a_wishlist = 'wishlist' in message_text
 
             # ===== 3. СОЗДАЁМ ДОСТУП A → B =====
             SharedAccess.objects.update_or_create(
@@ -984,10 +993,10 @@ class NotificationDetailView(View):
                 }
             )
 
-            # ===== 5. ОБНОВЛЯЕМ СТАТУС ПРИГЛАШЕНИЯ =====
             invite.status = 'accepted'
             invite.save()
-
+            notification = get_object_or_404(Notification, pk=pk, user=request.user)
+            notification.delete()
             messages.success(request, "Взаимный доступ успешно настроен.")
             return redirect('notifications_inbox')
 
@@ -1010,60 +1019,106 @@ class SharedAccountView(View):
     def get(self, request):
         form = SharedAccountForm()
 
-        # Все пользователи, которым ТЕКУЩИЙ пользователь дал доступ
         shared_with_users = SharedAccess.objects.filter(
             owner=request.user
         ).select_related('shared_with')
+
         received_accesses = SharedAccess.objects.filter(
             shared_with=request.user
         ).select_related('owner')
+
         return render(
             request,
             'accounts/shared_account.html',
             {
                 'form': form,
-                'shared_with_users': shared_with_users, "received_accesses":received_accesses
+                'shared_with_users': shared_with_users,
+                'received_accesses': received_accesses
             }
         )
 
-
     def post(self, request):
         form = SharedAccountForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            access_data = form.cleaned_data['access_data']
 
-            # Найдите пользователя по введенному email
-            try:
-                recipient_user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                messages.error(request, 'Пользователь с таким адресом электронной почты не найден.')
-                return render(request, 'accounts/shared_account.html', {'form': form})
-
-            # Создание уведомления для указанного пользователя
-            message = f'Вам предоставлен доступ к: {", ".join(access_data)}.\n'
-            notification_type = "shared_access"
-            now = timezone.localtime()
-            current_date = now.date()
-
-            # Сохраните уведомление
-            notification = Notification(user=recipient_user, message=message, notification_type=notification_type, created_at=current_date)
-            notification.save()
-
-            # Сохраните данные в SharedAccessInvite
-            invInvite = SharedAccessInvite(
-                sender=request.user,
-                receiver=recipient_user,
-                message=message,
-                status='pending'
-            )
-            invInvite.save()
-
-            messages.success(request, 'Уведомление отправлено и приглашение создано!')
-            return redirect('shared_account')
-        else:
+        if not form.is_valid():
             messages.error(request, 'Ошибка в форме. Пожалуйста, исправьте и повторите попытку.')
             return render(request, 'accounts/shared_account.html', {'form': form})
+
+        email = form.cleaned_data['email']
+        access_data = form.cleaned_data['access_data']
+
+        # ===== 1. ИЩЕМ ПОЛЬЗОВАТЕЛЯ =====
+        try:
+            recipient_user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(
+                request,
+                'Пользователь с таким адресом электронной почты не найден.'
+            )
+            return render(request, 'accounts/shared_account.html', {'form': form})
+
+        # 🚫 НЕЛЬЗЯ ОТПРАВЛЯТЬ ДОСТУП САМОМУ СЕБЕ
+        if recipient_user == request.user:
+            messages.error(request, 'Нельзя отправить доступ самому себе.')
+            return redirect('shared_account')
+
+        # ===== 2. ПРОВЕРКА: УЖЕ ЕСТЬ ДОСТУПЫ =====
+        access_exists = SharedAccess.objects.filter(
+            owner=request.user,
+            shared_with=recipient_user
+        ).exists() or SharedAccess.objects.filter(
+            owner=recipient_user,
+            shared_with=request.user
+        ).exists()
+
+        if access_exists:
+            messages.info(
+                request,
+                'У вас уже есть доступы. Их можно отредактировать.'
+            )
+            return redirect('shared_account')
+
+        # ===== 3. ПРОВЕРКА: УЖЕ ЕСТЬ ПРИГЛАШЕНИЕ =====
+        invite_exists = SharedAccessInvite.objects.filter(
+            sender=request.user,
+            receiver=recipient_user
+        ).exists() or SharedAccessInvite.objects.filter(
+            sender=recipient_user,
+            receiver=request.user
+        ).exists()
+
+        if invite_exists:
+            messages.info(
+                request,
+                'Запрос на доступ уже был отправлен.'
+            )
+            return redirect('shared_account')
+
+        # ===== 4. СОЗДАЁМ УВЕДОМЛЕНИЕ =====
+        message = f'Вам предоставлен доступ к: {", ".join(access_data)}.'
+        now = timezone.localtime()
+        current_date = now.date()
+        Notification.objects.create(
+            user=recipient_user,
+            message=message,
+            notification_type="access",
+            created_at=timezone.now()
+        )
+
+        # ===== 5. СОЗДАЁМ ПРИГЛАШЕНИЕ =====
+        SharedAccessInvite.objects.create(
+            sender=request.user,
+            receiver=recipient_user,
+            message=message,
+            status='pending'
+        )
+
+        messages.success(
+            request,
+            'Уведомление отправлено и приглашение создано!'
+        )
+        return redirect('shared_account')
+
 
 def settings_view(request):
     if request.method == 'POST':

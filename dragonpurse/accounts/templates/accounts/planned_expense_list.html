@@ -5,17 +5,18 @@
 {% block content %}
 
  <div class="sidebar">
-        <h1>DragonPurse</h1>
+       <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
 
         <a href="{% url 'transaction_list' %}"><button>Календарь</button></a>
         <a href="{% url 'planned_expense_create' %}"><button>Добавить запланированную транзакцию</button></a>
         <a href="{% url 'notifications_inbox' %}"><button>Уведомления</button></a>
-        <a href="{% url 'report_builder' %}"><button>Аналитика</button></a>
         <a href="{% url 'goals_list' %}"><button>Цели</button></a>
         <a href="{% url 'wishlist_list' %}"><button>Список желаний</button></a>
-        <a href="{% url 'login' %}"><button>Настройки</button></a>
         <div class="line"></div>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
 
     </div>
 <main>
