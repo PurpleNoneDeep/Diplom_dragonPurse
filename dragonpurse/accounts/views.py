@@ -916,6 +916,20 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
         notification.save()
         return redirect("notifications_inbox")
 
+class MarkNotificationReadView(View):
+    def post(self, request, pk):
+        notification = get_object_or_404(
+            Notification,
+            pk=pk,
+            user=request.user
+        )
+
+        if not notification.is_read:
+            notification.is_read = True
+            notification.save(update_fields=['is_read'])
+
+        messages.success(request, "Уведомление отмечено как прочитанное.")
+        return redirect('notifications_inbox')
 
 class NotificationDetailView(View):
     def get(self, request, pk):

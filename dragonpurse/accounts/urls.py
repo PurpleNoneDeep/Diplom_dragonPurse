@@ -6,7 +6,7 @@ from .views import IndexView, DashboardView, LoginView, LogoutView, TransactionL
     PlannedExpenseListView, PlannedExpenseCreateView, PlannedExpenseDeleteView, PlannedExpenseEditView, \
     NotificationMarkReadView, NotificationDeleteView, SharedAccountView, settings_view, \
     ProfileView, ChangeNameView, ChangeEmailView, ChangePasswordView, NotificationDetailView, SharedGoalsView, \
-    SharedWishlistView, SettingsView
+    SharedWishlistView, SettingsView, MarkNotificationReadView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -38,6 +38,7 @@ urlpatterns = [
     path('notifications/', NotificationMarkReadView.as_view(), name='notifications_inbox'),
     path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification_detail'),
     path('notifications/<int:pk>/delete/', NotificationDeleteView.as_view(), name='notification_delete'),
+    path('notifications/<int:pk>/read/', MarkNotificationReadView.as_view(), name='is_read'),
     path('shared-account/', SharedAccountView.as_view(), name='shared_account'),
     path('shared-goals/', SharedGoalsView.as_view(), name='shared_goals'),
     path('shared-wishlist/', SharedWishlistView.as_view(), name='shared_wishlist'),
