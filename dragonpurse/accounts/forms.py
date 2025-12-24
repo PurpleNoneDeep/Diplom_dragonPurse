@@ -9,6 +9,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .models import Goal, Wishlist
 from .models import SharedAccessInvite
+from django.utils.translation import gettext_lazy as _
 
 class SettingsForm(forms.Form):
     theme_color = forms.ChoiceField(
@@ -164,7 +165,17 @@ class SharedAccountForm(forms.Form):
 class ChangeNameForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ["first_name", "last_name"]
+        fields = ['first_name', 'last_name']
+
+        labels = {
+            'first_name': _('Имя'),
+            'last_name': _('Фамилия'),
+        }
+
+        help_texts = {
+            'first_name': _('Введите ваше имя'),
+            'last_name': _('Введите вашу фамилию'),
+        }
 class ChangeEmailForm(forms.ModelForm):
     class Meta:
         model = User

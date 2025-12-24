@@ -1,6 +1,6 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'accounts/css/add_form.css' %}">{% endblock %}
 {% block content %}
 
 <h2>Изменить имя</h2>
@@ -9,6 +9,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Сохранить</button>
+    <a href="{% url 'settings' %}"><button>Назад</button></a>
 </form>
 
 {% endblock %}

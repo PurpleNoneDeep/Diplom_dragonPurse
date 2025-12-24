@@ -5,15 +5,16 @@
 <link rel="stylesheet" href="{% static 'accounts/css/theme.css' %}">{% endblock %}
 {% block content %}
 <div class="sidebar">
-        <h1>DragonPurse</h1>
+        <h1><a href="{% url 'dashboard' %}">DragonPurse</a></h1>
 
-        <a href="{% url 'transaction_list' %}"><button>Главная</button></a>
         <a href="{% url 'change_name' %}"><button>Изменить имя</button></a>
         <a href="{% url 'change_email' %}"><button>Изменить почту</button></a>
         <a href="{% url 'change_password' %}"><button>Изменить пароль</button></a>
-        <a href="{% url 'settings' %}"><button>Вернуться к настройкам</button></a>
         <div class="line"></div>
-        <a href="{% url 'logout' %}"><button>Выйти</button></a>
+        <div style="display: flex; margin: 5px;">
+        <a href="{% url 'settings' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/settings_photo.png' %}" width="30" height="30" alt="настройки"></a>
+        <a href="{% url 'logout' %}" style="display: flex; margin: 5px;"><img src="{% static 'accounts/img/exit_photo.png' %}" width="30" height="30" alt="выход"></a>
+        </div>
 
     </div>
 <main>
@@ -23,7 +24,9 @@
             {% endfor %}
     {% endif %}
     <h1>Профиль пользователя</h1>
-    <p>Имя пользователя: {{ user.username }}</p>
+    <p>Логин: {{ user.username }}</p>
+    <p>Имя: {{ user.first_name}}</p>
+    <p>Фамилия: {{ user.last_name}}</p>
     <p>Email: {{ user.email }}</p>
     <p>Дата регистрации: {{ user.date_joined }}</p>
 
